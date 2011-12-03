@@ -6,7 +6,7 @@
 class vtkSuperPixelSegmentation : public vtkImageAlgorithm 
 {
 public:
-  vtkTypeRevisionMacro(vtkSuperPixelSegmentation,vtkImageAlgorithm);
+  vtkTypeMacro(vtkSuperPixelSegmentation,vtkImageAlgorithm);
   static vtkSuperPixelSegmentation *New();
 	  
   vtkSetMacro(Sigma, float);

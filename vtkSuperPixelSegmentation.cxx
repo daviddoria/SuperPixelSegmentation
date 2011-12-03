@@ -11,7 +11,6 @@
 #include "vtkSmartPointer.h"
 #include "vtkImageData.h"
 
-vtkCxxRevisionMacro(vtkSuperPixelSegmentation, "$Revision: 1.70 $");
 vtkStandardNewMacro(vtkSuperPixelSegmentation);
 
 vtkSuperPixelSegmentation::vtkSuperPixelSegmentation()
