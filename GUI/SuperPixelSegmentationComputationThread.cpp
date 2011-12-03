@@ -25,22 +25,17 @@ SuperPixelSegmentationComputationThread::SuperPixelSegmentationComputationThread
 
 }
 
-void SuperPixelSegmentationComputationThread::AllSteps()
+void SuperPixelSegmentationComputationThread::Compute()
 {
   emit StartProgressBarSignal();
 
   // Start the procedure
   this->Stop = false;
 
-  this->Object->Step();
+  this->Object->Compute();
 
   emit IterationCompleteSignal();
 
   // When the function is finished, end the thread
   exit();
-}
-
-void SuperPixelSegmentationComputationThread::SingleStep()
-{
-
 }

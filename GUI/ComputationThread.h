@@ -44,15 +44,10 @@ signals:
 public:
   ComputationThreadClass();
 
-  // Store the type of operation to perform.
-  enum OPERATION {ALLSTEPS, SINGLESTEP};
-  OPERATION Operation;
-
   // This function is called when the thread is started.
   void run();
 
-  virtual void AllSteps() = 0;
-  virtual void SingleStep() = 0;
+  virtual void Compute() = 0;
 
   // This function is called when the thread is stopped.
   void exit();

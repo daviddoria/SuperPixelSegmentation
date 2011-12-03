@@ -30,8 +30,7 @@ Q_OBJECT
 public:
   SuperPixelSegmentationComputationThread();
 
-  void AllSteps();
-  void SingleStep();
+  void Compute();
 
 };
 

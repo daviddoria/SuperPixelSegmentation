@@ -25,7 +25,7 @@ template<typename TImage, typename TLabelImage>
 class SuperPixelSegmentationComputationObject : public ComputationObject
 {
 public:
-  void Step();
+  void Compute();
   TImage* Image;
   TLabelImage* LabelImage;
 };

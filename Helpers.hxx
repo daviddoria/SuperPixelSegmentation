@@ -20,6 +20,8 @@
 #include "itkRescaleIntensityImageFilter.h"
 #include "itkImageFileWriter.h"
 
+#include <set>
+
 namespace Helpers
 {
 
@@ -125,6 +127,41 @@ void WriteRegion(const typename TImage::Pointer image, const itk::ImageRegion<2>
   writer->SetFileName(filename);
   writer->SetInput(regionOfInterestImageFilter->GetOutput());
   writer->Update();
+}
+
+template<typename TImage>
+void RelabelSequential(typename TImage::Pointer input, typename TImage::Pointer output)
+{
+  output->SetRegions(input->GetLargestPossibleRegion());
+  output->Allocate();
+
+  // Keep only unique label ids
+  std::set<typename TImage::PixelType> uniqueLabels;
+  itk::ImageRegionConstIterator<TImage> imageIterator(input, input->GetLargestPossibleRegion());
+
+  while(!imageIterator.IsAtEnd())
+    {
+    uniqueLabels.insert(imageIterator.Get());
+    ++imageIterator;
+    }
+
+  // Set old values to new sequential labels
+  unsigned int sequentialLabelId = 0;
+  for(typename std::set<typename TImage::PixelType>::iterator it1 = uniqueLabels.begin(); it1 != uniqueLabels.end(); it1++)
+    {
+    itk::ImageRegionIterator<TImage> outputIterator(output, output->GetLargestPossibleRegion());
+
+    while(!outputIterator.IsAtEnd())
+      {
+      // We check the input image because if we change pixels in the output image and then search it later, we could accidentially write incorrect values.
+      if(input->GetPixel(outputIterator.GetIndex()) == *it1)
+        {
+        outputIterator.Set(sequentialLabelId);
+        }
+      ++outputIterator;
+      }
+    sequentialLabelId++;
+    }
 }
 
 } // end namespace

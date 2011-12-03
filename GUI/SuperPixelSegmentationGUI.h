@@ -47,7 +47,7 @@ public slots:
   void on_actionOpenImage_activated();
   void on_actionSaveResult_activated();
   
-  void on_btnFill_clicked();
+  void on_btnSegment_clicked();
   
   void on_chkShowInput_clicked();
   void on_chkShowSegments_clicked();

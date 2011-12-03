@@ -12,7 +12,7 @@ rgb random_rgb()
   return c;
 }
 
-image<rgb> *segment_image(image<rgb> *im, float sigma, float c, int min_size,
+image<int> *segment_image(image<rgb> *im, float sigma, float c, int min_size,
 			  int *num_ccs) {
   int width = im->width();
   int height = im->height();
@@ -87,21 +87,30 @@ image<rgb> *segment_image(image<rgb> *im, float sigma, float c, int min_size,
   delete [] edges;
   *num_ccs = u->num_sets();
 
-  image<rgb> *output = new image<rgb>(width, height);
+//   image<rgb> *output = new image<rgb>(width, height);
+// 
+//   // pick random colors for each component
+//   rgb *colors = new rgb[width*height];
+//   for (int i = 0; i < width*height; i++)
+//     colors[i] = random_rgb();
+//   
+//   for (int y = 0; y < height; y++) {
+//     for (int x = 0; x < width; x++) {
+//       int comp = u->find(y * width + x);
+//       imRef(output, x, y) = colors[comp];
+//     }
+//   }
 
-  // pick random colors for each component
-  rgb *colors = new rgb[width*height];
-  for (int i = 0; i < width*height; i++)
-    colors[i] = random_rgb();
-  
+  image<int> *output = new image<int>(width, height);
+
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
       int comp = u->find(y * width + x);
-      imRef(output, x, y) = colors[comp];
+      imRef(output, x, y) = comp;
     }
   }  
 
-  delete [] colors;  
+  //delete [] colors;  
   delete u;
 
   return output;

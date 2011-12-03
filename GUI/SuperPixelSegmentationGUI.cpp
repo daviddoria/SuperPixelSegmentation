@@ -26,6 +26,8 @@
 // ITK
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
+#include "itkRGBPixel.h"
+#include "itkScalarToRGBColormapImageFilter.h"
 
 // Qt
 #include <QIcon>
@@ -72,17 +74,22 @@ SuperPixelSegmentationGUI::SuperPixelSegmentationGUI(const std::string& imageFil
 
 void SuperPixelSegmentationGUI::showEvent ( QShowEvent * event )
 {
-  this->graphicsView->fitInView(this->ImagePixmapItem, Qt::KeepAspectRatio);
+  if(this->ImagePixmapItem)
+    {
+    this->graphicsView->fitInView(this->ImagePixmapItem, Qt::KeepAspectRatio);
+    }
 }
 
 void SuperPixelSegmentationGUI::resizeEvent ( QResizeEvent * event )
 {
-  this->graphicsView->fitInView(this->ImagePixmapItem, Qt::KeepAspectRatio);
+  if(this->ImagePixmapItem)
+    {
+    this->graphicsView->fitInView(this->ImagePixmapItem, Qt::KeepAspectRatio);
+    }
 }
 
-void SuperPixelSegmentationGUI::on_btnFill_clicked()
+void SuperPixelSegmentationGUI::on_btnSegment_clicked()
 {
-  ComputationThread->Operation = ComputationThreadClass::ALLSTEPS;
   SuperPixelSegmentationComputationObject<ImageType, LabelImageType>* computationObject =
     new SuperPixelSegmentationComputationObject<ImageType, LabelImageType>;
   computationObject->Image = this->Image;
@@ -164,7 +171,17 @@ void SuperPixelSegmentationGUI::slot_StopProgressBar()
 
 void SuperPixelSegmentationGUI::slot_IterationComplete()
 {
-  QImage qimage = HelpersQt::GetQImageScalar<LabelImageType>(this->LabelImage);
+  //Helpers::WriteImage<LabelImageType>(this->LabelImage, "LabelImage.mha");
+  //QImage qimage = HelpersQt::GetQImageScalar<LabelImageType>(this->LabelImage);
+
+  typedef itk::Image<itk::RGBPixel<unsigned char>, 2> RGBImageType;
+  typedef itk::ScalarToRGBColormapImageFilter<LabelImageType, RGBImageType> ColorMapFilterType;
+  ColorMapFilterType::Pointer colorMapFilter = ColorMapFilterType::New();
+  colorMapFilter->SetInput(this->LabelImage);
+  colorMapFilter->SetColormap( ColorMapFilterType::Hot );
+  colorMapFilter->Update();
+
+  QImage qimage = HelpersQt::GetQImageRGB<RGBImageType>(colorMapFilter->GetOutput());
   this->LabelImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qimage));
-  //this->ResultPixmapItem->setVisible(this->chkShowOutput->isChecked());
+  this->LabelImagePixmapItem->setVisible(this->chkShowSegments->isChecked());
 }

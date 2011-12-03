@@ -37,6 +37,9 @@ void WriteRegion(const typename TImage::Pointer image, const itk::ImageRegion<2>
 template<typename TImage>
 void DeepCopy(typename TImage::Pointer input, typename TImage::Pointer output);
 
+template<typename TImage>
+void RelabelSequential(typename TImage::Pointer input, typename TImage::Pointer output);
+
 } // end namespace
 
 #include "Helpers.hxx"

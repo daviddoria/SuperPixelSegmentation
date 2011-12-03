@@ -4,7 +4,7 @@
 class ComputationObject
 {
 public:
-  virtual void Step() = 0;
+  virtual void Compute() = 0;
 };
 
 #endif

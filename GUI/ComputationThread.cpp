@@ -18,7 +18,7 @@
 
 #include "ComputationThread.h"
 
-ComputationThreadClass::ComputationThreadClass() : Operation(ALLSTEPS), Stop(false)
+ComputationThreadClass::ComputationThreadClass() : Stop(false)
 {
 
 }
@@ -30,14 +30,7 @@ void ComputationThreadClass::StopComputation()
 
 void ComputationThreadClass::run()
 {
-  if(this->Operation == ALLSTEPS)
-    {
-    AllSteps();
-    }
-  else if(this->Operation == SINGLESTEP)
-    {
-    SingleStep();
-    }
+  Compute();
 }
 
 void ComputationThreadClass::exit()

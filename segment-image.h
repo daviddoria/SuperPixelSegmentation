@@ -39,7 +39,7 @@ static inline float diff(image<float> *r, image<float> *g, image<float> *b,
 /*
  * Segment an image
  *
- * Returns a color image representing the segmentation.
+ * Returns a label image representing the segmentation.
  *
  * im: image to segment.
  * sigma: to smooth the image.
@@ -47,7 +47,7 @@ static inline float diff(image<float> *r, image<float> *g, image<float> *b,
  * min_size: minimum component size (enforced by post-processing stage).
  * num_ccs: number of connected components in the segmentation.
  */
-image<rgb> *segment_image(image<rgb> *im, float sigma, float c, int min_size,
+image<int> *segment_image(image<rgb> *im, float sigma, float c, int min_size,
 			  int *num_ccs);
 			  
 #endif
