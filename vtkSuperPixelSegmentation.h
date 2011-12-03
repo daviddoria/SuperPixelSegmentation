@@ -8,19 +8,19 @@ class vtkSuperPixelSegmentation : public vtkImageAlgorithm
 public:
   vtkTypeMacro(vtkSuperPixelSegmentation,vtkImageAlgorithm);
   static vtkSuperPixelSegmentation *New();
-	  
+
   vtkSetMacro(Sigma, float);
   vtkGetMacro(Sigma, float);
-  
+
   vtkSetMacro(K, float);
   vtkGetMacro(K, float);
-  
+
   vtkSetMacro(MinSize, int);
   vtkGetMacro(MinSize, int);
-  
+
 protected:
   vtkSuperPixelSegmentation();
-  
+
   int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 
 private:
@@ -30,7 +30,7 @@ private:
   float Sigma;
   float K;
   int MinSize;
-	
+
 };
 
 #endif
