@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 2.6)
 
 PROJECT(SuperPixelSegmentation)
-ENABLE_TESTING()
+
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+
+# Where to copy executables when 'make install' is run
+SET( INSTALL_DIR ${CMAKE_INSTALL_PREFIX} )
 
 add_library(libSuperPixelSegmentation
 disjoint-set.cxx imconv.cxx filter.cxx segment-graph.cxx segment-image.cxx)
@@ -27,4 +31,9 @@ endif()
 SET(BuildTesting OFF CACHE BOOL "Build testing?")
 if(BuildTesting)
   add_subdirectory(Testing)
+endif()
+
+SET(BuildGUI OFF CACHE BOOL "Build GUI?")
+if(BuildGUI)
+  add_subdirectory(GUI)
 endif()
