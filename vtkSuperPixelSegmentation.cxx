@@ -60,7 +60,7 @@ int vtkSuperPixelSegmentation::RequestData(vtkInformation *vtkNotUsed(request),
     }
 
   int numberOfSegments; 
-  image<rgb> *seg = segment_image(im, this->Sigma, this->K, this->MinSize, &numberOfSegments);
+  image<int> *seg = segment_image(im, this->Sigma, this->K, this->MinSize, &numberOfSegments);
 
   std::cout << "There were " << numberOfSegments << " segments." << std::endl;
 
@@ -73,11 +73,11 @@ int vtkSuperPixelSegmentation::RequestData(vtkInformation *vtkNotUsed(request),
     for(unsigned int c = 0; c < cols; c++)
       {
       unsigned char* color = static_cast<unsigned char*>(output->GetScalarPointer(c,r,0));
-      rgb rgbColor = seg->access[r][c];
+      int labelId = seg->access[r][c];
 
-      color[0] = rgbColor.r;
-      color[1] = rgbColor.g;
-      color[2] = rgbColor.b;
+      color[0] = labelId;
+      color[1] = labelId;
+      color[2] = labelId;
       }
     }
 
