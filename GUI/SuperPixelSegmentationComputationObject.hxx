@@ -9,9 +9,9 @@ void SuperPixelSegmentationComputationObject<TImage, TLabelImage>::Compute()
 {
   typedef itk::SuperPixelSegmentation<TImage, TLabelImage> SuperPixelSegmentationType;
   typename SuperPixelSegmentationType::Pointer superPixelSegmentation = SuperPixelSegmentationType::New();
-  superPixelSegmentation->SetSigma(.5);
-  superPixelSegmentation->SetK(500);
-  superPixelSegmentation->SetMinSize(50);
+  superPixelSegmentation->SetSigma(this->Sigma);
+  superPixelSegmentation->SetK(this->K);
+  superPixelSegmentation->SetMinSize(this->MinSize);
   superPixelSegmentation->SetInput(this->Image);
   superPixelSegmentation->Update();
 

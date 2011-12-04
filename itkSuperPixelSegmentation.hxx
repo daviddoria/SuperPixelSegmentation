@@ -19,6 +19,13 @@ namespace itk
 {
 
 template< typename TInputImage, typename TOutputImage>
+SuperPixelSegmentation< TInputImage, TOutputImage>
+::SuperPixelSegmentation() : m_MinSize(20), m_K(500), m_Sigma(2.0)
+{
+
+}
+
+template< typename TInputImage, typename TOutputImage>
 void SuperPixelSegmentation< TInputImage, TOutputImage>
 ::GenerateData()
 {

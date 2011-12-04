@@ -28,6 +28,10 @@ public:
   void Compute();
   TImage* Image;
   TLabelImage* LabelImage;
+
+  float Sigma;
+  float K;
+  unsigned int MinSize;
 };
 
 #include "SuperPixelSegmentationComputationObject.hxx"

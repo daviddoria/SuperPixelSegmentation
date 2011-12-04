@@ -39,6 +39,21 @@ void SuperPixelSegmentationGUI::DefaultConstructor()
 {
   this->setupUi(this);
 
+  this->MinSizeMin = 0;
+  this->MinSizeMax = 100;
+  this->sldMinSize->setMinimum(this->MinSizeMin);
+  this->sldMinSize->setMaximum(this->MinSizeMax);
+  
+  this->KMin = 0.0f;
+  this->KMax = 100.0f;
+  this->sldK->SetMinValue(this->KMin);
+  this->sldK->SetMaxValue(this->KMax);
+
+  this->SigmaMin = 1.0f;
+  this->SigmaMax = 10.0f;
+  this->sldSigma->SetMinValue(this->SigmaMin);
+  this->sldSigma->SetMaxValue(this->SigmaMax);
+  
   this->progressBar->setMinimum(0);
   this->progressBar->setMaximum(0);
   this->progressBar->hide();
@@ -92,6 +107,9 @@ void SuperPixelSegmentationGUI::on_btnSegment_clicked()
 {
   SuperPixelSegmentationComputationObject<ImageType, LabelImageType>* computationObject =
     new SuperPixelSegmentationComputationObject<ImageType, LabelImageType>;
+  computationObject->K = this->sldK->GetValue();
+  computationObject->Sigma = this->sldSigma->GetValue();
+  computationObject->MinSize = this->sldMinSize->value();
   computationObject->Image = this->Image;
   computationObject->LabelImage = this->LabelImage;
   ComputationThread->SetObject(computationObject);
@@ -126,7 +144,7 @@ void SuperPixelSegmentationGUI::OpenImage(const std::string& imageFileName)
   QImage qimageImage = HelpersQt::GetQImageRGBA<ImageType>(this->Image);
   this->ImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qimageImage));
   this->graphicsView->fitInView(this->ImagePixmapItem);
-  this->ImagePixmapItem->setVisible(this->chkShowInput->isChecked());
+  Refresh();
 }
 
 void SuperPixelSegmentationGUI::on_actionOpenImage_activated()
@@ -142,22 +160,13 @@ void SuperPixelSegmentationGUI::on_actionOpenImage_activated()
 
 void SuperPixelSegmentationGUI::on_chkShowInput_clicked()
 {
-  if(!this->ImagePixmapItem)
-    {
-    return;
-    }
-  this->ImagePixmapItem->setVisible(this->chkShowInput->isChecked());
+  Refresh();
 }
 
 void SuperPixelSegmentationGUI::on_chkShowSegments_clicked()
 {
-  if(!this->LabelImagePixmapItem)
-    {
-    return;
-    }
-  this->LabelImagePixmapItem->setVisible(this->chkShowSegments->isChecked());
+  Refresh();
 }
-
 
 void SuperPixelSegmentationGUI::slot_StartProgressBar()
 {
@@ -182,6 +191,23 @@ void SuperPixelSegmentationGUI::slot_IterationComplete()
   colorMapFilter->Update();
 
   QImage qimage = HelpersQt::GetQImageRGB<RGBImageType>(colorMapFilter->GetOutput());
+  if(this->LabelImagePixmapItem)
+    {
+    this->Scene->removeItem(this->LabelImagePixmapItem);
+    }
   this->LabelImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qimage));
-  this->LabelImagePixmapItem->setVisible(this->chkShowSegments->isChecked());
+
+  Refresh();
+}
+
+void SuperPixelSegmentationGUI::Refresh()
+{
+  if(this->LabelImagePixmapItem)
+    {
+    this->LabelImagePixmapItem->setVisible(this->chkShowSegments->isChecked());
+    }
+  if(this->ImagePixmapItem)
+    {
+    this->ImagePixmapItem->setVisible(this->chkShowInput->isChecked());
+    }
 }

@@ -21,6 +21,69 @@
     <item row="0" column="0">
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLabel" name="label1">
+          <property name="text">
+           <string>K: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="FloatSlider" name="sldK">
+          <property name="toolTip">
+           <string>The current time</string>
+          </property>
+          <property name="whatsThis">
+           <string>The float slider widget allows the user to select a float value.</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Sigma:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="FloatSlider" name="sldSigma">
+          <property name="toolTip">
+           <string>The current time</string>
+          </property>
+          <property name="whatsThis">
+           <string>The float slider widget allows the user to select a float value.</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>MinSize:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="LabeledSlider" name="sldMinSize">
+          <property name="toolTip">
+           <string>The current time</string>
+          </property>
+          <property name="whatsThis">
+           <string>The slider widget displays the min, max, and selected values.</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
        <widget class="QPushButton" name="btnSegment">
         <property name="text">
          <string>Segment</string>
@@ -88,6 +151,18 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FloatSlider</class>
+   <extends>QWidget</extends>
+   <header>FloatSlider.h</header>
+  </customwidget>
+  <customwidget>
+   <class>LabeledSlider</class>
+   <extends>QWidget</extends>
+   <header>LabeledSlider.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

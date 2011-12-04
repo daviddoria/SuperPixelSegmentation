@@ -20,17 +20,20 @@ public:
   /** Run-time type information (and related methods). */
   itkTypeMacro(SuperPixelSegmentation, ImageToImageFilter);
 
+  // Minimum component size (enforced by post-processing stage).
   itkSetMacro( MinSize, int );
   itkGetMacro( MinSize, int);
 
+  // Constant for threshold function. Larger K causes a preferences for larger components.
   itkSetMacro( K, float );
   itkGetMacro( K, float);
 
+  // Variance of smoothing kernel.
   itkSetMacro( Sigma, float );
   itkGetMacro( Sigma, float);
   
 protected:
-  SuperPixelSegmentation(){}
+  SuperPixelSegmentation();
   ~SuperPixelSegmentation(){}
 
   /** Does the real work. */

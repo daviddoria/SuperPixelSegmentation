@@ -58,6 +58,8 @@ public slots:
 
 protected:
 
+  void Refresh();
+  
   void showEvent ( QShowEvent * event );
   void resizeEvent ( QResizeEvent * event );
   
@@ -75,6 +77,16 @@ protected:
 
 
   SuperPixelSegmentationComputationThread* ComputationThread;
+
+private:
+  int MinSizeMin;
+  int MinSizeMax;
+
+  float KMin;
+  float KMax;
+
+  float SigmaMin;
+  float SigmaMax;
 };
 
 #endif // SuperPixelSegmentationGUI_H
