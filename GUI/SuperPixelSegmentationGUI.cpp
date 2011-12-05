@@ -40,19 +40,19 @@ void SuperPixelSegmentationGUI::DefaultConstructor()
   this->setupUi(this);
 
   this->MinSizeMin = 0;
-  this->MinSizeMax = 100;
+  this->MinSizeMax = 200;
   this->sldMinSize->setMinimum(this->MinSizeMin);
   this->sldMinSize->setMaximum(this->MinSizeMax);
   
   this->KMin = 0.0f;
-  this->KMax = 100.0f;
-  this->sldK->SetMinValue(this->KMin);
-  this->sldK->SetMaxValue(this->KMax);
+  this->KMax = 1000.0f;
+  this->sldK->setMinimum(this->KMin);
+  this->sldK->setMaximum(this->KMax);
 
   this->SigmaMin = 1.0f;
   this->SigmaMax = 10.0f;
-  this->sldSigma->SetMinValue(this->SigmaMin);
-  this->sldSigma->SetMaxValue(this->SigmaMax);
+  this->sldSigma->setMinimum(this->SigmaMin);
+  this->sldSigma->setMaximum(this->SigmaMax);
   
   this->progressBar->setMinimum(0);
   this->progressBar->setMaximum(0);
