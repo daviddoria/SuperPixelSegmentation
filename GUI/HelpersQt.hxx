@@ -65,9 +65,6 @@ QImage GetQImageRGB(const typename TImage::Pointer image, const itk::ImageRegion
     ++imageIterator;
     }
 
-  QColor highlightColor(255, 0, 255);
-  qimage.setPixel(region.GetSize()[0]/2, region.GetSize()[1]/2, highlightColor.rgb());
-  
   //return qimage; // The actual image region
   return qimage.mirrored(false, true); // The flipped image region
 }

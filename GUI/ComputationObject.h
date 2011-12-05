@@ -5,6 +5,8 @@ class ComputationObject
 {
 public:
   virtual void Compute() = 0;
+  
+  unsigned int FinalNumberOfSegments;
 };
 
 #endif

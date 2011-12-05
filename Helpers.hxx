@@ -164,4 +164,35 @@ void RelabelSequential(typename TImage::Pointer input, typename TImage::Pointer 
     }
 }
 
+template<typename TImage>
+unsigned int CountPixelsWithValue(const typename TImage::Pointer image, typename TImage::PixelType value)
+{
+  itk::ImageRegionConstIterator<TImage> imageIterator(image, image->GetLargestPossibleRegion());
+
+  unsigned int counter = 0;
+  while(!imageIterator.IsAtEnd())
+    {
+    if(image->Get() == value)
+      {
+      counter++;
+      }
+    ++imageIterator;
+    }
+  return counter;
+}
+
+template <class TImage>
+float MaxValue(const typename TImage::Pointer image)
+{
+  typedef typename itk::MinimumMaximumImageCalculator<TImage>
+          ImageCalculatorFilterType;
+
+  typename ImageCalculatorFilterType::Pointer imageCalculatorFilter
+          = ImageCalculatorFilterType::New ();
+  imageCalculatorFilter->SetImage(image);
+  imageCalculatorFilter->Compute();
+
+  return imageCalculatorFilter->GetMaximum();
+}
+
 } // end namespace

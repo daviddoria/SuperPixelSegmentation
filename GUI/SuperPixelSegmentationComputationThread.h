@@ -26,7 +26,9 @@
 class SuperPixelSegmentationComputationThread : public ComputationThreadClass
 {
 Q_OBJECT
-
+signals:
+  void IterationCompleteSignal(unsigned int);
+  
 public:
   SuperPixelSegmentationComputationThread();
 

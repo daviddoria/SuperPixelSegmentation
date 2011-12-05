@@ -54,7 +54,7 @@ public slots:
 
   void slot_StartProgressBar();
   void slot_StopProgressBar();
-  void slot_IterationComplete();
+  void slot_IterationComplete(unsigned int);
 
 protected:
 
@@ -87,6 +87,7 @@ private:
 
   float SigmaMin;
   float SigmaMax;
+
 };
 
 #endif // SuperPixelSegmentationGUI_H

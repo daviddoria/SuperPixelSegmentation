@@ -17,6 +17,7 @@
  *=========================================================================*/
 
 #include "SuperPixelSegmentationComputationThread.h"
+#include "SuperPixelSegmentationComputationObject.h"
 
 #include "itkSuperPixelSegmentation.h"
 
@@ -34,7 +35,10 @@ void SuperPixelSegmentationComputationThread::Compute()
 
   this->Object->Compute();
 
-  emit IterationCompleteSignal();
+  //unsigned int num = dynamic_cast<SuperPixelSegmentationComputationObject<ImageT*>(this->Object)->FinalNumberOfSegments;
+  //emit IterationCompleteSignal();
+  //emit IterationCompleteSignal(dynamic_cast<SuperPixelSegmentationComputationObject*>(this->Object)->FinalNumberOfSegments);
+  emit IterationCompleteSignal(this->Object->FinalNumberOfSegments);
 
   // When the function is finished, end the thread
   exit();

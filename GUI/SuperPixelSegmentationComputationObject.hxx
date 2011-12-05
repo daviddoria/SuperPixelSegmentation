@@ -15,5 +15,7 @@ void SuperPixelSegmentationComputationObject<TImage, TLabelImage>::Compute()
   superPixelSegmentation->SetInput(this->Image);
   superPixelSegmentation->Update();
 
+  this->FinalNumberOfSegments = superPixelSegmentation->FinalNumberOfSegments;
+  
   Helpers::DeepCopy<TLabelImage>(superPixelSegmentation->GetOutput(), this->LabelImage);
 }

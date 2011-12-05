@@ -60,7 +60,8 @@ void SuperPixelSegmentation< TInputImage, TOutputImage>
   image<int> *segmentImage = segment_image(im, this->m_Sigma, this->m_K, this->m_MinSize, &numberOfSegments);
 
   std::cout << "There were " << numberOfSegments << " segments." << std::endl;
-
+  this->FinalNumberOfSegments = numberOfSegments;
+  
   itk::ImageRegionIterator<TOutputImage> outputIterator(output, output->GetLargestPossibleRegion());
 
   while(!outputIterator.IsAtEnd())

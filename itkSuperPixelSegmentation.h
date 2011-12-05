@@ -32,6 +32,8 @@ public:
   itkSetMacro( Sigma, float );
   itkGetMacro( Sigma, float);
   
+  unsigned int FinalNumberOfSegments;
+  
 protected:
   SuperPixelSegmentation();
   ~SuperPixelSegmentation(){}
@@ -46,6 +48,8 @@ private:
   int m_MinSize;
   float m_K;
   float m_Sigma;
+  
+  
 };
 } //namespace ITK
 
