@@ -49,8 +49,8 @@ void SuperPixelSegmentationGUI::DefaultConstructor()
   this->sldK->setMinimum(this->KMin);
   this->sldK->setMaximum(this->KMax);
 
-  this->SigmaMin = 1.0f;
-  this->SigmaMax = 10.0f;
+  this->SigmaMin = 0.0f;
+  this->SigmaMax = 2.0f;
   this->sldSigma->setMinimum(this->SigmaMin);
   this->sldSigma->setMaximum(this->SigmaMax);
   
@@ -192,6 +192,7 @@ void SuperPixelSegmentationGUI::slot_IterationComplete(unsigned int numberOfSegm
   colorImage->Allocate();
 
   unsigned int maxLabel = Helpers::MaxValue<LabelImageType>(this->LabelImage);
+  std::vector<RGBImageType::PixelType> segmentColors;
   for(unsigned int labelId = 0; labelId <= maxLabel; ++labelId)
     {
     //std::cout << "Coloring label " << labelId << std::endl;
@@ -213,19 +214,18 @@ void SuperPixelSegmentationGUI::slot_IterationComplete(unsigned int numberOfSegm
     colorPixel[0] = rgb[0]/static_cast<float>(counter);
     colorPixel[1] = rgb[1]/static_cast<float>(counter);
     colorPixel[2] = rgb[2]/static_cast<float>(counter);
-    
-    itk::ImageRegionIterator<LabelImageType> colorIterator(this->LabelImage, this->LabelImage->GetLargestPossibleRegion());
-    
-    while(!colorIterator.IsAtEnd())
-      {
-      if(colorIterator.Get() == labelId)
-        {
-        colorImage->SetPixel(colorIterator.GetIndex(), colorPixel);
-        }// end if
-      ++colorIterator;
-      } // end while
-
+    segmentColors.push_back(colorPixel);
     } // end for
+    
+        
+  itk::ImageRegionIterator<LabelImageType> colorIterator(this->LabelImage, this->LabelImage->GetLargestPossibleRegion());
+  
+  while(!colorIterator.IsAtEnd())
+    {
+    colorImage->SetPixel(colorIterator.GetIndex(), segmentColors[colorIterator.Get()]);
+
+    ++colorIterator;
+    } // end while
 
   QImage qimage = HelpersQt::GetQImageRGB<RGBImageType>(colorImage);
   if(this->LabelImagePixmapItem)
@@ -234,7 +234,6 @@ void SuperPixelSegmentationGUI::slot_IterationComplete(unsigned int numberOfSegm
     }
   this->LabelImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qimage));
 
-  
   Refresh();
 }
 
