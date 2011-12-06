@@ -1,14 +1,16 @@
 #ifndef __itkImageFilter_txx
 #define __itkImageFilter_txx
 
+#include "itkSuperPixelSegmentation.h"
+
 // Custom
 #include "Helpers.h"
 
 // ITK
-#include "itkSuperPixelSegmentation.h"
-#include "itkObjectFactory.h"
+#include "itkBilateralImageFilter.h"
 #include "itkImageRegionIterator.h"
 #include "itkImageRegionConstIterator.h"
+#include "itkObjectFactory.h"
 
 // Segmentation
 #include "image.h" // The image class for the segmentation algorithm
@@ -18,21 +20,46 @@
 namespace itk
 {
 
-template< typename TInputImage, typename TOutputImage>
-SuperPixelSegmentation< TInputImage, TOutputImage>
+template< typename TInputImage, typename TOutputLabelImage>
+SuperPixelSegmentation< TInputImage, TOutputLabelImage>
 ::SuperPixelSegmentation() : m_MinSize(20), m_K(500), m_Sigma(2.0)
 {
 
 }
 
-template< typename TInputImage, typename TOutputImage>
-void SuperPixelSegmentation< TInputImage, TOutputImage>
+template< typename TInputImage, typename TOutputLabelImage>
+void SuperPixelSegmentation< TInputImage, TOutputLabelImage>
 ::GenerateData()
 {
-  typename TInputImage::ConstPointer input = this->GetInput();
-  typename TOutputImage::Pointer output = this->GetOutput();
-  output->SetRegions(input->GetLargestPossibleRegion());
-  output->Allocate();
+  typename TInputImage::ConstPointer filterInput = this->GetInput();
+  
+  typename TInputImage::Pointer input;
+  if(!this->m_BlurFirst)
+    {
+    input = const_cast<TInputImage*>(filterInput.GetPointer());
+    }
+  else
+    {
+    // Optionally blur
+//     typedef itk::BilateralImageFilter<TInputImage, TInputImage>  BilateralImageFilterType;
+//     BilateralImageFilterType::Pointer bilateralImageFilter = BilateralImageFilterType::New();
+//     bilateralImageFilter->SetInput(filterInput);
+//     bilateralImageFilter->SetDomainSigma(domainSigma);
+//     bilateralImageFilter->SetRangeSigma(rangeSigma);
+//     bilateralImageFilter->Update();
+//    input = bilateralImageFilter->GetOutput();
+    float domainSigma = 3.0f;
+    float rangeSigma = 10.0f;
+    //Helpers::BilateralAllChannels<TInputImage>(filterInput, input, domainSigma, rangeSigma);
+    Helpers::BilateralAllChannels<TInputImage>(const_cast<TInputImage*>(filterInput.GetPointer()), input, domainSigma, rangeSigma);
+
+    }
+
+  Helpers::WriteImage<TInputImage>(input, "finalInput.mha");
+  
+  typename TOutputLabelImage::Pointer outputLabelImage = this->GetOutput();
+  outputLabelImage->SetRegions(input->GetLargestPossibleRegion());
+  outputLabelImage->Allocate();
 
   itk::Size<2> size = input->GetLargestPossibleRegion().GetSize();
   //std::cout << "Size: " << size << std::endl;
@@ -62,7 +89,7 @@ void SuperPixelSegmentation< TInputImage, TOutputImage>
   std::cout << "There were " << numberOfSegments << " segments." << std::endl;
   this->FinalNumberOfSegments = numberOfSegments;
   
-  itk::ImageRegionIterator<TOutputImage> outputIterator(output, output->GetLargestPossibleRegion());
+  itk::ImageRegionIterator<TOutputLabelImage> outputIterator(outputLabelImage, outputLabelImage->GetLargestPossibleRegion());
 
   while(!outputIterator.IsAtEnd())
     {
@@ -73,7 +100,7 @@ void SuperPixelSegmentation< TInputImage, TOutputImage>
     ++outputIterator;
     }
 
-  Helpers::RelabelSequential<TOutputImage>(output, output);
+  Helpers::RelabelSequential<TOutputLabelImage>(outputLabelImage, outputLabelImage);
     
 }
 

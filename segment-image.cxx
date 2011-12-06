@@ -20,6 +20,15 @@ image<int> *segment_image(image<rgb> *im, float c, int min_size, int *num_ccs) {
   image<float> *g = new image<float>(width, height);
   image<float> *b = new image<float>(width, height);
  
+  // Copy the input image into the separate channel images
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      imRef(r, x, y) = imRef(im, x, y).r;
+      imRef(g, x, y) = imRef(im, x, y).g;
+      imRef(b, x, y) = imRef(im, x, y).b;
+    }
+  }
+
   // build graph
   edge *edges = new edge[width*height*4];
   int num = 0;

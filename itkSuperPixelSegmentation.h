@@ -5,13 +5,13 @@
 
 namespace itk
 {
-template< typename TInputImage, typename TOutputImage>
-class SuperPixelSegmentation : public ImageToImageFilter< TInputImage, TOutputImage >
+template< typename TInputImage, typename TOutputLabelImage>
+class SuperPixelSegmentation : public ImageToImageFilter<TInputImage, TOutputLabelImage>
 {
 public:
   /** Standard class typedefs. */
   typedef SuperPixelSegmentation Self;
-  typedef ImageToImageFilter< TInputImage, TOutputImage > Superclass;
+  typedef ImageToImageFilter<TInputImage, TOutputLabelImage> Superclass;
   typedef SmartPointer< Self >        Pointer;
 
   /** Method for creation through the object factory. */
@@ -32,6 +32,10 @@ public:
   itkSetMacro( Sigma, float );
   itkGetMacro( Sigma, float);
   
+  // Blur the image before computing the super pixels.
+  itkSetMacro( BlurFirst, bool);
+  itkGetMacro( BlurFirst, bool);
+  
   unsigned int FinalNumberOfSegments;
   
 protected:
@@ -49,7 +53,7 @@ private:
   float m_K;
   float m_Sigma;
   
-  
+  bool m_BlurFirst;
 };
 } //namespace ITK
 

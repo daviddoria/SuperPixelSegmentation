@@ -19,6 +19,9 @@
 #ifndef HELPERS_OUTPUT_H
 #define HELPERS_OUTPUT_H
 
+// ITK
+#include "itkVectorImage.h"
+
 namespace Helpers
 {
 
@@ -41,10 +44,19 @@ template<typename TImage>
 void WriteRegion(const typename TImage::Pointer image, const itk::ImageRegion<2>& region, const std::string& filename);
 
 template<typename TImage>
-void DeepCopy(typename TImage::Pointer input, typename TImage::Pointer output);
+void DeepCopy(const TImage* input, TImage* output);
+
+template<typename TImage>
+void DeepCopyInRegion(const TImage* input, const itk::ImageRegion<2>& region, TImage* output);
+
+template<>
+void DeepCopy<itk::VectorImage<unsigned char, 2> >(const itk::VectorImage<unsigned char, 2>* input, itk::VectorImage<unsigned char, 2>* output);
 
 template<typename TImage>
 void RelabelSequential(typename TImage::Pointer input, typename TImage::Pointer output);
+
+template<typename TVectorImage>
+void BilateralFilterAllChannels(const TVectorImage* image, TVectorImage* output, const float domainSigma, const float rangeSigma);
 
 } // end namespace
 

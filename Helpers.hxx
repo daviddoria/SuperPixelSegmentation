@@ -16,19 +16,30 @@
  *
  *=========================================================================*/
 
+// ITK
 #include "itkRegionOfInterestImageFilter.h"
 #include "itkRescaleIntensityImageFilter.h"
 #include "itkImageFileWriter.h"
+#include "itkVectorIndexSelectionCastImageFilter.h"
+#include "itkComposeImageFilter.h"
+#include "itkBilateralImageFilter.h"
 
+// STL
 #include <set>
 
 namespace Helpers
 {
 
 template<typename TImage>
-void DeepCopy(typename TImage::Pointer input, typename TImage::Pointer output)
+void DeepCopy(const TImage* input, TImage* output)
 {
-  output->SetRegions(input->GetLargestPossibleRegion());
+  DeepCopyInRegion<TImage>(input, input->GetLargestPossibleRegion(), output);
+}
+
+template<typename TImage>
+void DeepCopyInRegion(const TImage* input, const itk::ImageRegion<2>& region, TImage* output)
+{
+  output->SetRegions(region);
   output->Allocate();
 
   itk::ImageRegionConstIterator<TImage> inputIterator(input, input->GetLargestPossibleRegion());
@@ -41,6 +52,7 @@ void DeepCopy(typename TImage::Pointer input, typename TImage::Pointer output)
     ++outputIterator;
     }
 }
+
 
 template <class T>
 void WriteScaledScalarImage(const typename T::Pointer image, const std::string& filename)
@@ -193,6 +205,50 @@ float MaxValue(const typename TImage::Pointer image)
   imageCalculatorFilter->Compute();
 
   return imageCalculatorFilter->GetMaximum();
+}
+
+
+template<typename TVectorImage>
+void BilateralAllChannels(const TVectorImage* image, TVectorImage* output, const float domainSigma, const float rangeSigma)
+{
+  typedef itk::Image<typename TVectorImage::InternalPixelType, 2> ScalarImageType;
+  
+  // Disassembler
+  typedef itk::VectorIndexSelectionCastImageFilter<TVectorImage, ScalarImageType> IndexSelectionType;
+  typename IndexSelectionType::Pointer indexSelectionFilter = IndexSelectionType::New();
+  indexSelectionFilter->SetInput(image);
+  
+  // Reassembler
+  typedef itk::ComposeImageFilter<ScalarImageType, TVectorImage> ImageToVectorImageFilterType;
+  typename ImageToVectorImageFilterType::Pointer imageToVectorImageFilter = ImageToVectorImageFilterType::New();
+  
+  std::vector< typename ScalarImageType::Pointer > filteredImages;
+  
+  for(unsigned int i = 0; i < image->GetNumberOfComponentsPerPixel(); ++i)
+    {
+    indexSelectionFilter->SetIndex(i);
+    indexSelectionFilter->Update();
+  
+    typename ScalarImageType::Pointer imageChannel = ScalarImageType::New();
+    DeepCopy<ScalarImageType>(indexSelectionFilter->GetOutput(), imageChannel);
+  
+    typedef itk::BilateralImageFilter<ScalarImageType, ScalarImageType>  BilateralFilterType;
+    typename BilateralFilterType::Pointer bilateralFilter = BilateralFilterType::New();
+    bilateralFilter->SetInput(imageChannel);
+    bilateralFilter->SetDomainSigma(domainSigma);
+    bilateralFilter->SetRangeSigma(rangeSigma);
+    bilateralFilter->Update();
+    
+    typename ScalarImageType::Pointer blurred = ScalarImageType::New();
+    DeepCopy<ScalarImageType>(bilateralFilter->GetOutput(), blurred);
+    
+    filteredImages.push_back(blurred);
+    imageToVectorImageFilter->SetInput(i, filteredImages[i]);
+    }
+
+  imageToVectorImageFilter->Update();
+ 
+  DeepCopy<TVectorImage>(imageToVectorImageFilter->GetOutput(), output);
 }
 
 } // end namespace
