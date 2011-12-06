@@ -12,8 +12,85 @@ rgb random_rgb()
   return c;
 }
 
-image<int> *segment_image(image<rgb> *im, float sigma, float c, int min_size,
-			  int *num_ccs) {
+image<int> *segment_image(image<rgb> *im, float c, int min_size, int *num_ccs) {
+  int width = im->width();
+  int height = im->height();
+
+  image<float> *r = new image<float>(width, height);
+  image<float> *g = new image<float>(width, height);
+  image<float> *b = new image<float>(width, height);
+ 
+  // build graph
+  edge *edges = new edge[width*height*4];
+  int num = 0;
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      if (x < width-1) {
+	edges[num].a = y * width + x;
+	edges[num].b = y * width + (x+1);
+	edges[num].w = diff(r, g, b, x, y, x+1, y);
+	num++;
+      }
+
+      if (y < height-1) {
+	edges[num].a = y * width + x;
+	edges[num].b = (y+1) * width + x;
+	edges[num].w = diff(r, g, b, x, y, x, y+1);
+	num++;
+      }
+
+      if ((x < width-1) && (y < height-1)) {
+	edges[num].a = y * width + x;
+	edges[num].b = (y+1) * width + (x+1);
+	edges[num].w = diff(r, g, b, x, y, x+1, y+1);
+	num++;
+      }
+
+      if ((x < width-1) && (y > 0)) {
+	edges[num].a = y * width + x;
+	edges[num].b = (y-1) * width + (x+1);
+	edges[num].w = diff(r, g, b, x, y, x+1, y-1);
+	num++;
+      }
+    }
+  }
+
+  delete r;
+  delete g;
+  delete b;
+
+
+  // segment
+  universe *u = segment_graph(width*height, num, edges, c);
+  
+  // post process small components
+  for (int i = 0; i < num; i++) {
+    int a = u->find(edges[i].a);
+    int b = u->find(edges[i].b);
+    if ((a != b) && ((u->size(a) < min_size) || (u->size(b) < min_size)))
+      u->join(a, b);
+  }
+  delete [] edges;
+  *num_ccs = u->num_sets();
+
+  image<int> *output = new image<int>(width, height);
+
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      int comp = u->find(y * width + x);
+      imRef(output, x, y) = comp;
+    }
+  }  
+
+  //delete [] colors;  
+  delete u;
+
+  return output;
+}
+
+
+image<int> *segment_image_with_smoothing(image<rgb> *im, float sigma, float c, int min_size,
+                          int *num_ccs) {
   int width = im->width();
   int height = im->height();
 
@@ -42,31 +119,31 @@ image<int> *segment_image(image<rgb> *im, float sigma, float c, int min_size,
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
       if (x < width-1) {
-	edges[num].a = y * width + x;
-	edges[num].b = y * width + (x+1);
-	edges[num].w = diff(smooth_r, smooth_g, smooth_b, x, y, x+1, y);
-	num++;
+        edges[num].a = y * width + x;
+        edges[num].b = y * width + (x+1);
+        edges[num].w = diff(smooth_r, smooth_g, smooth_b, x, y, x+1, y);
+        num++;
       }
 
       if (y < height-1) {
-	edges[num].a = y * width + x;
-	edges[num].b = (y+1) * width + x;
-	edges[num].w = diff(smooth_r, smooth_g, smooth_b, x, y, x, y+1);
-	num++;
+        edges[num].a = y * width + x;
+        edges[num].b = (y+1) * width + x;
+        edges[num].w = diff(smooth_r, smooth_g, smooth_b, x, y, x, y+1);
+        num++;
       }
 
       if ((x < width-1) && (y < height-1)) {
-	edges[num].a = y * width + x;
-	edges[num].b = (y+1) * width + (x+1);
-	edges[num].w = diff(smooth_r, smooth_g, smooth_b, x, y, x+1, y+1);
-	num++;
+        edges[num].a = y * width + x;
+        edges[num].b = (y+1) * width + (x+1);
+        edges[num].w = diff(smooth_r, smooth_g, smooth_b, x, y, x+1, y+1);
+        num++;
       }
 
       if ((x < width-1) && (y > 0)) {
-	edges[num].a = y * width + x;
-	edges[num].b = (y-1) * width + (x+1);
-	edges[num].w = diff(smooth_r, smooth_g, smooth_b, x, y, x+1, y-1);
-	num++;
+        edges[num].a = y * width + x;
+        edges[num].b = (y-1) * width + (x+1);
+        edges[num].w = diff(smooth_r, smooth_g, smooth_b, x, y, x+1, y-1);
+        num++;
       }
     }
   }
@@ -86,20 +163,6 @@ image<int> *segment_image(image<rgb> *im, float sigma, float c, int min_size,
   }
   delete [] edges;
   *num_ccs = u->num_sets();
-
-//   image<rgb> *output = new image<rgb>(width, height);
-// 
-//   // pick random colors for each component
-//   rgb *colors = new rgb[width*height];
-//   for (int i = 0; i < width*height; i++)
-//     colors[i] = random_rgb();
-//   
-//   for (int y = 0; y < height; y++) {
-//     for (int x = 0; x < width; x++) {
-//       int comp = u->find(y * width + x);
-//       imRef(output, x, y) = colors[comp];
-//     }
-//   }
 
   image<int> *output = new image<int>(width, height);
 

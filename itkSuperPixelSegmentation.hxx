@@ -57,7 +57,7 @@ void SuperPixelSegmentation< TInputImage, TOutputImage>
     }
 
   int numberOfSegments;
-  image<int> *segmentImage = segment_image(im, this->m_Sigma, this->m_K, this->m_MinSize, &numberOfSegments);
+  image<int> *segmentImage = segment_image(im, this->m_K, this->m_MinSize, &numberOfSegments);
 
   std::cout << "There were " << numberOfSegments << " segments." << std::endl;
   this->FinalNumberOfSegments = numberOfSegments;

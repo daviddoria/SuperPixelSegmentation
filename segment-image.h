@@ -47,7 +47,10 @@ static inline float diff(image<float> *r, image<float> *g, image<float> *b,
  * min_size: minimum component size (enforced by post-processing stage).
  * num_ccs: number of connected components in the segmentation.
  */
-image<int> *segment_image(image<rgb> *im, float sigma, float c, int min_size,
+image<int> *segment_image(image<rgb> *im, float c, int min_size,
 			  int *num_ccs);
-			  
+
+image<int> *segment_image_with_smoothing(image<rgb> *im, float sigma, float c, int min_size,
+                          int *num_ccs);
+
 #endif
