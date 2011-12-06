@@ -31,9 +31,7 @@
         </item>
         <item>
          <widget class="FloatSlider" name="sldK">
-          <property name="toolTip">
-           <string>The current time</string>
-          </property>
+
           <property name="whatsThis">
            <string>The float slider widget allows the user to select a float value.</string>
           </property>
@@ -52,9 +50,6 @@
         </item>
         <item>
          <widget class="FloatSlider" name="sldSigma">
-          <property name="toolTip">
-           <string>The current time</string>
-          </property>
           <property name="whatsThis">
            <string>The float slider widget allows the user to select a float value.</string>
           </property>
@@ -73,9 +68,6 @@
         </item>
         <item>
          <widget class="LabeledSlider" name="sldMinSize">
-          <property name="toolTip">
-           <string>The current time</string>
-          </property>
           <property name="whatsThis">
            <string>The slider widget displays the min, max, and selected values.</string>
           </property>
