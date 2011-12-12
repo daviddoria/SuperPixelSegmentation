@@ -24,9 +24,13 @@ public:
   itkSetMacro( KernelSize, float);
   itkGetMacro( KernelSize, float);
 
-  // Spatial distance weight.
+  // Maximum distance between two pixels in the same label.
   itkSetMacro( MaxDist, float );
   itkGetMacro( MaxDist, float);
+  
+  // Tradeoff between color and distance. Larger values give more importance to color.
+  itkSetMacro( Ratio, float );
+  itkGetMacro( Ratio, float);
 
   TOutputLabelImage* GetLabelImage();
   TInputImage* GetColoredImage();
@@ -64,6 +68,7 @@ private:
 
   float m_KernelSize;
   float m_MaxDist;
+  float m_Ratio;
 };
 } //namespace ITK
 

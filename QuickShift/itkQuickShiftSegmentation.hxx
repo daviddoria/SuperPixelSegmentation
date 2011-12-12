@@ -75,7 +75,7 @@ void QuickShiftSegmentation< TInputImage, TOutputLabelImage>
   
   vl_qs_type* image = new vl_qs_type[totalPixels*channels];
   
-  vl_qs_type ratio = 10.0f;
+  
   for(unsigned int channel = 0; channel < channels; ++channel)
     {
     for (unsigned int y = 0 ; y < height ; ++y)
@@ -83,13 +83,13 @@ void QuickShiftSegmentation< TInputImage, TOutputLabelImage>
       for (unsigned int x = 0  ; x < width ; ++x) 
         {
         unsigned int linearIndex = ComputeLinearValueIndex(y, x, width, height, channel);
-        std::cout << "linearIndex: " << linearIndex << std::endl;
+        //std::cout << "linearIndex: " << linearIndex << std::endl;
         float noise = drand48()/10.0f;
         if(x <= 1)
           {
           //image[linearIndex] = 255;
           image[linearIndex] = 1.0 + noise;
-          image[linearIndex] *= ratio;
+          image[linearIndex] *= this->m_Ratio;
           }
         else
           {
@@ -111,47 +111,64 @@ void QuickShiftSegmentation< TInputImage, TOutputLabelImage>
   vl_quickshift_set_max_dist(quickshift, this->m_MaxDist);
 
   vl_quickshift_process(quickshift);
-
+  std::cout << "Finished processing." << std::endl;
+  
   // Retrieve the parents (These can be used to segment the image in superpixels.)
   int* parents = vl_quickshift_get_parents(quickshift);
 
+  std::cout << "GetVectorFromArray()" << std::endl;
   std::vector<int> parentsVector = GetVectorFromArray(parents, totalPixels);
 
+  std::cout << "GetLabelsFromParents()" << std::endl;
   std::vector<int> labels = GetLabelsFromParents(parentsVector);
-  
-  std::cout << "Labels vector:" << std::endl;
-  
-  std::vector<int> sequentialLabels = SequentialLabels(labels);
-  
+
+//   std::cout << "SequentialLabels()" << std::endl;
+//   std::vector<int> sequentialLabels = SequentialLabels(labels);
+
   //Retrieve the distances (These can be used to segment the image in superpixels.)
   vl_qs_type* distances = vl_quickshift_get_dists(quickshift);
   // Pixels that are roots have distance=inf
-  
+
+  // Construct label image from label array
   typename TOutputLabelImage::Pointer outputLabelImage = this->GetLabelImage(); // One of the output ports
   outputLabelImage->SetRegions(input->GetLargestPossibleRegion());
   outputLabelImage->Allocate();
-  
+
   itk::ImageRegionIterator<TOutputLabelImage> labelIterator(outputLabelImage, outputLabelImage->GetLargestPossibleRegion());
- 
+
   unsigned int labelId = 0;
   while(!labelIterator.IsAtEnd())
     {
     unsigned int linearIndex = ComputeLinearPixelIndex(labelIterator.GetIndex()[1], labelIterator.GetIndex()[0], height);
-    labelIterator.Set(sequentialLabels[linearIndex]);
- 
+    labelIterator.Set(labels[linearIndex]);
+
     ++labelIterator;
     labelId++;
     }
+  
+//   itk::ImageRegionIterator<TOutputLabelImage> labelIterator(outputLabelImage, outputLabelImage->GetLargestPossibleRegion());
+// 
+//   unsigned int labelId = 0;
+//   while(!labelIterator.IsAtEnd())
+//     {
+//     unsigned int linearIndex = ComputeLinearPixelIndex(labelIterator.GetIndex()[1], labelIterator.GetIndex()[0], height);
+//     labelIterator.Set(sequentialLabels[linearIndex]);
+// 
+//     ++labelIterator;
+//     labelId++;
+//     }
 
   // Delete the quick shift object
   vl_quickshift_delete(quickshift);
-  
+
+  std::cout << "RelabelSequential()" << std::endl;
   Helpers::RelabelSequential<TOutputLabelImage>(outputLabelImage, outputLabelImage); // This is the 0th output port of the filter
-  
-  Helpers::WriteImage<TOutputLabelImage>(outputLabelImage, "SLIC_LabelImage.mha");
-  
+
+  Helpers::WriteImage<TOutputLabelImage>(outputLabelImage, "QuickShift_LabelImage.mha");
+
+  std::cout << "ColorLabelsByAverageColor()" << std::endl;
   Helpers::ColorLabelsByAverageColor<TInputImage, TOutputLabelImage>(input, this->GetLabelImage(), this->GetColoredImage());
-  Helpers::WriteImage<TInputImage>(this->GetColoredImage(), "SLIC_ColoredImage.mha");
+  Helpers::WriteImage<TInputImage>(this->GetColoredImage(), "QuickShift_ColoredImage.mha");
 }
 
 template< typename TInputImage, typename TOutputLabelImage>
@@ -173,7 +190,6 @@ std::vector<int> QuickShiftSegmentation< TInputImage, TOutputLabelImage>
 {
   // The values of the 'parents' array indicate the linear index of the pixel that is the parent of each pixel.
   // Compare to the LABELS output of [LABELS CLUSTERS] = VL_FLATMAP(MAP) in Matlab.
-
   std::vector<int> labels(parents.size(), 0);
 
   // Initialize by copying
@@ -223,27 +239,32 @@ std::vector<int> QuickShiftSegmentation< TInputImage, TOutputLabelImage>
 ::SequentialLabels(const std::vector<int>& v)
 {
   std::vector<int> sequentialLabels(v.size());
-  std::set<int> uniqueLabels;
+  std::set<int> uniqueLabelsSet;
   for(unsigned int i = 0; i < v.size(); ++i)
     {
-    uniqueLabels.insert(v[i]);
+    uniqueLabelsSet.insert(v[i]);
     }
 
+  std::vector<int> uniqueLabelsVector;
+  for(typename std::set<int>::iterator iterator = uniqueLabelsSet.begin(); iterator != uniqueLabelsSet.end(); iterator++)
+    {
+    uniqueLabelsVector.push_back(*iterator);
+    }
+
+  std::map<int,int> labelMap;
+  for(unsigned int i = 0; i < uniqueLabelsVector.size(); ++i)
+    {
+    labelMap[uniqueLabelsVector[i]] = i;
+    }
+    
   // Set old values to new sequential labels
   unsigned int sequentialLabelId = 0;
-  for(typename std::set<int>::iterator it1 = uniqueLabels.begin(); it1 != uniqueLabels.end(); it1++)
+
+  for(unsigned int i = 0; i < v.size(); ++i)
     {
-    
-    for(unsigned int i = 0; i < v.size(); ++i)
-      {
-      // We check the input image because if we change pixels in the output image and then search it later, we could accidentially write incorrect values.
-      if(v[i] == *it1)
-        {
-        sequentialLabels[i] = sequentialLabelId;
-        }
-      }
-    sequentialLabelId++;
+    sequentialLabels[i] = labelMap[v[i]];
     }
+    
   return sequentialLabels;
 }
 

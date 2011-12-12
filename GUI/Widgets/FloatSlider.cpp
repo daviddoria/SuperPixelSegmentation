@@ -7,20 +7,20 @@
 //FloatSlider::FloatSlider(QWidget *parent) : LabeledSlider(parent)
 FloatSlider::FloatSlider(QWidget *parent) : LabeledSlider(parent)
 {
-  this->horizontalSlider->setMinimum(this->txtMin->text().toFloat());
-  this->horizontalSlider->setMaximum(this->txtMax->text().toFloat());
+  this->horizontalSlider->setMinimum(0);
+  this->horizontalSlider->setMaximum(100);
 
   this->MinValue = 0.0f;
+  this->txtMin->setText(QString::number(this->MinValue));
+  
   this->MaxValue = 10.0f;
+  this->txtMax->setText(QString::number(this->MaxValue));
 
   this->lblCurrent->setText(QString::number(GetValue()));
 
   this->Validator = new QDoubleValidator(0.0d, 10000.0d, 2, this);
   this->txtMin->setValidator(this->Validator);
   this->txtMax->setValidator(this->Validator);
-
-  this->horizontalSlider->setMinimum(0);
-  this->horizontalSlider->setMaximum(100);
 
   //connect(this->horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(slot_horizontalSlider_valueChanged(int)));
 }
@@ -50,7 +50,6 @@ void FloatSlider::slot_horizontalSlider_valueChanged(int value)
   this->lblCurrent->setText(QString::number(GetValue()));
   emit valueChanged(GetValue());
 }
-
 
 void FloatSlider::on_txtMin_textEdited( const QString & text )
 {

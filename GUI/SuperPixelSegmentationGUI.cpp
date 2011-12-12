@@ -38,6 +38,7 @@ void SuperPixelSegmentationGUI::DefaultConstructor()
 {
   this->setupUi(this);
 
+  // GraphCut sliders
   this->MinSizeMin = 0;
   this->MinSizeMax = 200;
   this->sldGraphCutMinSize->setMinimum(this->MinSizeMin);
@@ -52,6 +53,33 @@ void SuperPixelSegmentationGUI::DefaultConstructor()
   this->SigmaMax = 2.0f;
   this->sldGraphCutSigma->setMinimum(this->SigmaMin);
   this->sldGraphCutSigma->setMaximum(this->SigmaMax);
+  
+  // QuickShift sliders
+  this->MaxDistMin = 0.0f;
+  this->MaxDistMax = 100.0f;
+  this->sldMaxDist->setMinimum(this->MaxDistMin);
+  this->sldMaxDist->setMaximum(this->MaxDistMax);
+  
+  this->KernelSizeMin = 1;
+  this->KernelSizeMax = 10;
+  this->sldKernelSize->setMinimum(this->KernelSizeMin);
+  this->sldKernelSize->setMaximum(this->KernelSizeMax);
+  
+  this->RatioMin = 0;
+  this->RatioMax = 10;
+  this->sldRatio->setMinimum(this->RatioMin);
+  this->sldRatio->setMaximum(this->RatioMax);
+  
+  // SLIC sliders
+  this->NumberOfSuperPixelsMin = 100;
+  this->NumberOfSuperPixelsMax = 1000;
+  this->sldSLICNumberOfSuperPixels->setMinimum(this->NumberOfSuperPixelsMin);
+  this->sldSLICNumberOfSuperPixels->setMaximum(this->NumberOfSuperPixelsMax);
+  
+  this->SpatialDistanceWeightMin = 0;
+  this->SpatialDistanceWeightMax = 10;
+  this->sldSLICSpatialDistanceWeight->setMinimum(this->SpatialDistanceWeightMin);
+  this->sldSLICSpatialDistanceWeight->setMaximum(this->SpatialDistanceWeightMax);
   
   // Marquee mode
   this->progressBar->setMinimum(0);
@@ -134,6 +162,7 @@ void SuperPixelSegmentationGUI::on_btnSegmentQuickShift_clicked()
 {
   this->QuickShiftFilter->SetKernelSize(this->sldKernelSize->GetValue());
   this->QuickShiftFilter->SetMaxDist(this->sldMaxDist->GetValue());
+  this->QuickShiftFilter->SetRatio(this->sldRatio->GetValue());
   this->QuickShiftFilter->SetInput(this->Image);
   QuickShiftThread->SetFilter(this->QuickShiftFilter);
   std::cout << "Starting quick shift thread..." << std::endl;

@@ -157,23 +157,30 @@ void RelabelSequential(typename TImage::Pointer input, typename TImage::Pointer 
     ++imageIterator;
     }
 
-  // Set old values to new sequential labels
-  unsigned int sequentialLabelId = 0;
-  for(typename std::set<typename TImage::PixelType>::iterator it1 = uniqueLabels.begin(); it1 != uniqueLabels.end(); it1++)
+  // Copy the set into a vector to induce an ordering
+  std::vector<typename TImage::PixelType> sequentialLabels;
+  for(typename std::set<typename TImage::PixelType>::iterator iterator = uniqueLabels.begin(); iterator != uniqueLabels.end(); iterator++)
     {
-    itk::ImageRegionIterator<TImage> outputIterator(output, output->GetLargestPossibleRegion());
-
-    while(!outputIterator.IsAtEnd())
-      {
-      // We check the input image because if we change pixels in the output image and then search it later, we could accidentially write incorrect values.
-      if(input->GetPixel(outputIterator.GetIndex()) == *it1)
-        {
-        outputIterator.Set(sequentialLabelId);
-        }
-      ++outputIterator;
-      }
-    sequentialLabelId++;
+    sequentialLabels.push_back(*iterator);
     }
+
+  std::map <typename TImage::PixelType, typename TImage::PixelType> labelMap;
+  for(unsigned int i = 0; i < sequentialLabels.size(); ++i)
+    {
+    labelMap[sequentialLabels[i]] = i;
+    }
+
+  // Set old values to new sequential labels
+  itk::ImageRegionIterator<TImage> outputIterator(output, output->GetLargestPossibleRegion());
+
+  while(!outputIterator.IsAtEnd())
+    {
+    // We check the input image because if we change pixels in the output image and then search it later, we could accidentially write incorrect values.
+    outputIterator.Set(labelMap[input->GetPixel(outputIterator.GetIndex())]);
+
+    ++outputIterator;
+    }
+
 }
 
 template<typename TImage>

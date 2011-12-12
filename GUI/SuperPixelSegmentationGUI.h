@@ -100,6 +100,7 @@ protected:
   ITKComputationThread<QuickShiftFilterType>* QuickShiftThread;
 
 private:
+  // GraphCut sliders
   int MinSizeMin;
   int MinSizeMax;
 
@@ -108,6 +109,23 @@ private:
 
   float SigmaMin;
   float SigmaMax;
+  
+  // QuickShift sliders
+  float MaxDistMin;
+  float MaxDistMax;
+  
+  float KernelSizeMin;
+  float KernelSizeMax;
+  
+  float RatioMin;
+  float RatioMax;
+  
+  // SLIC sliders
+  float NumberOfSuperPixelsMin;
+  float NumberOfSuperPixelsMax;
+  
+  float SpatialDistanceWeightMin;
+  float SpatialDistanceWeightMax;
 
 };
 

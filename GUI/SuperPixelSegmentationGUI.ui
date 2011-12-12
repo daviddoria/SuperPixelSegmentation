@@ -20,7 +20,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -192,6 +192,27 @@
             </item>
             <item>
              <widget class="FloatSlider" name="sldKernelSize">
+              <property name="toolTip">
+               <string>The current time</string>
+              </property>
+              <property name="whatsThis">
+               <string>The float slider widget allows the user to select a float value.</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <item>
+             <widget class="QLabel" name="label_7">
+              <property name="text">
+               <string>Ratio</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="FloatSlider" name="sldRatio">
               <property name="toolTip">
                <string>The current time</string>
               </property>
