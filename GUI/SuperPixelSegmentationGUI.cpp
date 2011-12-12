@@ -21,7 +21,7 @@
 // Custom
 #include "Helpers.h"
 #include "HelpersQt.h"
-#include "SuperPixelSegmentationComputationObject.h"
+#include "GraphCutSegmentationComputationObject.h"
 
 // ITK
 #include "itkImageFileReader.h"
@@ -58,7 +58,7 @@ void SuperPixelSegmentationGUI::DefaultConstructor()
   this->progressBar->setMaximum(0);
   this->progressBar->hide();
 
-  this->ComputationThread = new SuperPixelSegmentationComputationThread;
+  this->ComputationThread = new GraphCutSegmentationComputationThread;
   connect(this->ComputationThread, SIGNAL(StartProgressBarSignal()), this, SLOT(slot_StartProgressBar()));
   connect(this->ComputationThread, SIGNAL(StopProgressBarSignal()), this, SLOT(slot_StopProgressBar()));
   //connect(this->ComputationThread, SIGNAL(IterationCompleteSignal()), this, SLOT(slot_IterationComplete()));
@@ -106,8 +106,8 @@ void SuperPixelSegmentationGUI::resizeEvent ( QResizeEvent * event )
 
 void SuperPixelSegmentationGUI::on_btnSegment_clicked()
 {
-  SuperPixelSegmentationComputationObject<ImageType, LabelImageType>* computationObject =
-    new SuperPixelSegmentationComputationObject<ImageType, LabelImageType>;
+  GraphCutSegmentationComputationObject<ImageType, LabelImageType>* computationObject =
+    new GraphCutSegmentationComputationObject<ImageType, LabelImageType>;
   computationObject->K = this->sldK->GetValue();
   computationObject->Sigma = this->sldSigma->GetValue();
   computationObject->MinSize = this->sldMinSize->value();

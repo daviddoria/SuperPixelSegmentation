@@ -16,24 +16,25 @@
  *
  *=========================================================================*/
 
-#ifndef SUPERPIXELSEGMENTATIONCOMPUTATIONTHREAD_H
-#define SUPERPIXELSEGMENTATIONCOMPUTATIONTHREAD_H
+#ifndef GRAPHCUTSEGMENTATIONCOMPUTATIONOBJECT_H
+#define GRAPHCUTSEGMENTATIONCOMPUTATIONOBJECT_H
 
-#include <QThread>
+#include "ComputationObject.h"
 
-#include "ComputationThread.h"
-
-class SuperPixelSegmentationComputationThread : public ComputationThreadClass
+template<typename TImage, typename TLabelImage>
+class GraphCutSegmentationComputationObject : public ComputationObject
 {
-Q_OBJECT
-signals:
-  void IterationCompleteSignal(unsigned int);
-  
 public:
-  SuperPixelSegmentationComputationThread();
-
   void Compute();
+  TImage* Image;
+  TLabelImage* LabelImage;
+
+  float Sigma;
+  float K;
+  unsigned int MinSize;
 
 };
+
+#include "GraphCutSegmentationComputationObject.hxx"
 
 #endif

@@ -2,7 +2,7 @@
 #include <itkImageFileReader.h>
 #include <itkImageFileWriter.h>
 
-#include "itkSuperPixelSegmentation.h"
+#include "itkGraphCutSegmentation.h"
 
 //typedef itk::Image<itk::CovariantVector<float, 3>, 2> ImageType;
 typedef itk::VectorImage<float, 2> ImageType;

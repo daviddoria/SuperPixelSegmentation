@@ -1,7 +1,7 @@
-#ifndef __itkImageFilter_txx
-#define __itkImageFilter_txx
+#ifndef __itkGraphCutSegmentation_txx
+#define __itkGraphCutSegmentation_txx
 
-#include "itkSuperPixelSegmentation.h"
+#include "itkGraphCutSegmentation.h"
 
 // Custom
 #include "Helpers.h"
@@ -21,14 +21,14 @@ namespace itk
 {
 
 template< typename TInputImage, typename TOutputLabelImage>
-SuperPixelSegmentation< TInputImage, TOutputLabelImage>
-::SuperPixelSegmentation() : m_MinSize(20), m_K(500), m_Sigma(2.0)
+GraphCutSegmentation< TInputImage, TOutputLabelImage>
+::GraphCutSegmentation() : m_MinSize(20), m_K(500), m_Sigma(2.0)
 {
 
 }
 
 template< typename TInputImage, typename TOutputLabelImage>
-void SuperPixelSegmentation< TInputImage, TOutputLabelImage>
+void GraphCutSegmentation< TInputImage, TOutputLabelImage>
 ::GenerateData()
 {
   typename TInputImage::ConstPointer filterInput = this->GetInput();

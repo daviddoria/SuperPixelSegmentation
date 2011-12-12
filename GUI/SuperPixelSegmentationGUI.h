@@ -26,7 +26,7 @@
 #include "itkVectorImage.h"
 
 // Custom
-#include "SuperPixelSegmentationComputationThread.h"
+#include "GraphCutSegmentationComputationThread.h"
 
 // Qt
 #include <QMainWindow>
@@ -78,7 +78,7 @@ protected:
   std::string SourceImageFileName;
 
 
-  SuperPixelSegmentationComputationThread* ComputationThread;
+  GraphCutSegmentationComputationThread* ComputationThread;
 
 private:
   int MinSizeMin;

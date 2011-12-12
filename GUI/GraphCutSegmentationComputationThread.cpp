@@ -16,17 +16,17 @@
  *
  *=========================================================================*/
 
-#include "SuperPixelSegmentationComputationThread.h"
-#include "SuperPixelSegmentationComputationObject.h"
+#include "GraphCutSegmentationComputationThread.h"
+#include "GraphCutSegmentationComputationObject.h"
 
-#include "itkSuperPixelSegmentation.h"
+#include "itkGraphCutSegmentation.h"
 
-SuperPixelSegmentationComputationThread::SuperPixelSegmentationComputationThread() : ComputationThreadClass()
+GraphCutSegmentationComputationThread::GraphCutSegmentationComputationThread() : ComputationThreadClass()
 {
 
 }
 
-void SuperPixelSegmentationComputationThread::Compute()
+void GraphCutSegmentationComputationThread::Compute()
 {
   emit StartProgressBarSignal();
 

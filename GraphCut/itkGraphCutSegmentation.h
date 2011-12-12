@@ -1,16 +1,16 @@
-#ifndef __itkSuperPixelSegmentation_h
-#define __itkSuperPixelSegmentation_h
+#ifndef __itkGraphCutSegmentation_h
+#define __itkGraphCutSegmentation_h
 
 #include "itkImageToImageFilter.h"
 
 namespace itk
 {
 template< typename TInputImage, typename TOutputLabelImage>
-class SuperPixelSegmentation : public ImageToImageFilter<TInputImage, TOutputLabelImage>
+class GraphCutSegmentation : public ImageToImageFilter<TInputImage, TOutputLabelImage>
 {
 public:
   /** Standard class typedefs. */
-  typedef SuperPixelSegmentation Self;
+  typedef GraphCutSegmentation Self;
   typedef ImageToImageFilter<TInputImage, TOutputLabelImage> Superclass;
   typedef SmartPointer< Self >        Pointer;
 
@@ -18,7 +18,7 @@ public:
   itkNewMacro(Self);
 
   /** Run-time type information (and related methods). */
-  itkTypeMacro(SuperPixelSegmentation, ImageToImageFilter);
+  itkTypeMacro(GraphCutSegmentation, ImageToImageFilter);
 
   // Minimum component size (enforced by post-processing stage).
   itkSetMacro( MinSize, int );
@@ -39,14 +39,14 @@ public:
   unsigned int FinalNumberOfSegments;
   
 protected:
-  SuperPixelSegmentation();
-  ~SuperPixelSegmentation(){}
+  GraphCutSegmentation();
+  ~GraphCutSegmentation(){}
 
   /** Does the real work. */
   virtual void GenerateData();
 
 private:
-  SuperPixelSegmentation(const Self &); //purposely not implemented
+  GraphCutSegmentation(const Self &); //purposely not implemented
   void operator=(const Self &);  //purposely not implemented
 
   int m_MinSize;
@@ -57,6 +57,6 @@ private:
 };
 } //namespace ITK
 
-#include "itkSuperPixelSegmentation.hxx"
+#include "itkGraphCutSegmentation.hxx"
 
 #endif
