@@ -41,18 +41,18 @@ void SuperPixelSegmentationGUI::DefaultConstructor()
 
   this->MinSizeMin = 0;
   this->MinSizeMax = 200;
-  this->sldMinSize->setMinimum(this->MinSizeMin);
-  this->sldMinSize->setMaximum(this->MinSizeMax);
+  this->sldGraphCutMinSize->setMinimum(this->MinSizeMin);
+  this->sldGraphCutMinSize->setMaximum(this->MinSizeMax);
   
   this->KMin = 0.0f;
   this->KMax = 1000.0f;
-  this->sldK->setMinimum(this->KMin);
-  this->sldK->setMaximum(this->KMax);
+  this->sldGraphCutK->setMinimum(this->KMin);
+  this->sldGraphCutK->setMaximum(this->KMax);
 
   this->SigmaMin = 0.0f;
   this->SigmaMax = 2.0f;
-  this->sldSigma->setMinimum(this->SigmaMin);
-  this->sldSigma->setMaximum(this->SigmaMax);
+  this->sldGraphCutSigma->setMinimum(this->SigmaMin);
+  this->sldGraphCutSigma->setMaximum(this->SigmaMax);
   
   this->progressBar->setMinimum(0);
   this->progressBar->setMaximum(0);
@@ -108,9 +108,9 @@ void SuperPixelSegmentationGUI::on_btnSegment_clicked()
 {
   GraphCutSegmentationComputationObject<ImageType, LabelImageType>* computationObject =
     new GraphCutSegmentationComputationObject<ImageType, LabelImageType>;
-  computationObject->K = this->sldK->GetValue();
-  computationObject->Sigma = this->sldSigma->GetValue();
-  computationObject->MinSize = this->sldMinSize->value();
+  computationObject->K = this->sldGraphCutK->GetValue();
+  computationObject->Sigma = this->sldGraphCutSigma->GetValue();
+  computationObject->MinSize = this->sldGraphCutMinSize->value();
   computationObject->Image = this->Image;
   computationObject->LabelImage = this->LabelImage;
   ComputationThread->SetObject(computationObject);

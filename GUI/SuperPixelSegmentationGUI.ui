@@ -20,7 +20,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -37,7 +37,10 @@
              </widget>
             </item>
             <item>
-             <widget class="FloatSlider" name="sldK" native="true">
+             <widget class="FloatSlider" name="sldGraphCutK">
+              <property name="toolTip">
+               <string>The current time</string>
+              </property>
               <property name="whatsThis">
                <string>The float slider widget allows the user to select a float value.</string>
               </property>
@@ -55,7 +58,10 @@
              </widget>
             </item>
             <item>
-             <widget class="FloatSlider" name="sldSigma" native="true">
+             <widget class="FloatSlider" name="sldGraphCutSigma">
+              <property name="toolTip">
+               <string>The current time</string>
+              </property>
               <property name="whatsThis">
                <string>The float slider widget allows the user to select a float value.</string>
               </property>
@@ -73,7 +79,10 @@
              </widget>
             </item>
             <item>
-             <widget class="LabeledSlider" name="sldMinSize" native="true">
+             <widget class="LabeledSlider" name="sldGraphCutMinSize">
+              <property name="toolTip">
+               <string>The current time</string>
+              </property>
               <property name="whatsThis">
                <string>The slider widget displays the min, max, and selected values.</string>
               </property>
@@ -94,6 +103,57 @@
          <attribute name="title">
           <string>SLIC</string>
          </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <item>
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>Number of superpixels</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="LabeledSlider" name="sldSLICNumberOfSuperPixels">
+              <property name="toolTip">
+               <string>The current time</string>
+              </property>
+              <property name="whatsThis">
+               <string>The slider widget displays the min, max, and selected values.</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <item>
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>Spatial distance weight</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="FloatSlider" name="sldSLICSpatialDistanceWeight">
+              <property name="toolTip">
+               <string>The current time</string>
+              </property>
+              <property name="whatsThis">
+               <string>The float slider widget allows the user to select a float value.</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnSegmentSLIC">
+            <property name="text">
+             <string>Segment</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
         <widget class="QWidget" name="tab_3">
          <attribute name="title">
@@ -177,7 +237,7 @@
  <customwidgets>
   <customwidget>
    <class>FloatSlider</class>
-   <extends>QWidget</extends>
+   <extends>LabeledSlider</extends>
    <header>FloatSlider.h</header>
   </customwidget>
   <customwidget>

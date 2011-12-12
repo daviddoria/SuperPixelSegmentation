@@ -15,18 +15,18 @@ int main(int argc, char* argv[])
   reader->SetFileName(argv[1]);
   reader->Update();
   
-  typedef itk::SuperPixelSegmentation<ImageType, LabelImageType> SuperPixelSegmentationType;
-  SuperPixelSegmentationType::Pointer superPixelSegmentation = SuperPixelSegmentationType::New();
-  superPixelSegmentation->SetSigma(.5);
-  superPixelSegmentation->SetK(500);
-  superPixelSegmentation->SetMinSize(50);
-  superPixelSegmentation->SetInput(reader->GetOutput());
-  superPixelSegmentation->Update();
+  typedef itk::GraphCutSegmentation<ImageType, LabelImageType> GraphCutSegmentationType;
+  GraphCutSegmentationType::Pointer graphCutSegmentation = GraphCutSegmentationType::New();
+  graphCutSegmentation->SetSigma(.5);
+  graphCutSegmentation->SetK(500);
+  graphCutSegmentation->SetMinSize(50);
+  graphCutSegmentation->SetInput(reader->GetOutput());
+  graphCutSegmentation->Update();
   
   typedef itk::ImageFileWriter<LabelImageType> WriterType;
   WriterType::Pointer writer = WriterType::New();
   writer->SetFileName(argv[2]);
-  writer->SetInput(superPixelSegmentation->GetOutput());
+  writer->SetInput(graphCutSegmentation->GetOutput());
   writer->Update();
 
   return EXIT_SUCCESS;
