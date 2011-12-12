@@ -112,7 +112,7 @@ void QuickShiftSegmentation< TInputImage, TOutputLabelImage>
 
   vl_quickshift_process(quickshift);
   std::cout << "Finished processing." << std::endl;
-  
+
   // Retrieve the parents (These can be used to segment the image in superpixels.)
   int* parents = vl_quickshift_get_parents(quickshift);
 
@@ -121,13 +121,6 @@ void QuickShiftSegmentation< TInputImage, TOutputLabelImage>
 
   std::cout << "GetLabelsFromParents()" << std::endl;
   std::vector<int> labels = GetLabelsFromParents(parentsVector);
-
-//   std::cout << "SequentialLabels()" << std::endl;
-//   std::vector<int> sequentialLabels = SequentialLabels(labels);
-
-  //Retrieve the distances (These can be used to segment the image in superpixels.)
-  vl_qs_type* distances = vl_quickshift_get_dists(quickshift);
-  // Pixels that are roots have distance=inf
 
   // Construct label image from label array
   typename TOutputLabelImage::Pointer outputLabelImage = this->GetLabelImage(); // One of the output ports
@@ -145,18 +138,6 @@ void QuickShiftSegmentation< TInputImage, TOutputLabelImage>
     ++labelIterator;
     labelId++;
     }
-  
-//   itk::ImageRegionIterator<TOutputLabelImage> labelIterator(outputLabelImage, outputLabelImage->GetLargestPossibleRegion());
-// 
-//   unsigned int labelId = 0;
-//   while(!labelIterator.IsAtEnd())
-//     {
-//     unsigned int linearIndex = ComputeLinearPixelIndex(labelIterator.GetIndex()[1], labelIterator.GetIndex()[0], height);
-//     labelIterator.Set(sequentialLabels[linearIndex]);
-// 
-//     ++labelIterator;
-//     labelId++;
-//     }
 
   // Delete the quick shift object
   vl_quickshift_delete(quickshift);
