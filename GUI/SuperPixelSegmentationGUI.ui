@@ -20,7 +20,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>1</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -159,6 +159,57 @@
          <attribute name="title">
           <string>QuickShift</string>
          </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>Max Dist</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="FloatSlider" name="sldMaxDist">
+              <property name="toolTip">
+               <string>The current time</string>
+              </property>
+              <property name="whatsThis">
+               <string>The float slider widget allows the user to select a float value.</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Kernel size</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="FloatSlider" name="sldKernelSize">
+              <property name="toolTip">
+               <string>The current time</string>
+              </property>
+              <property name="whatsThis">
+               <string>The float slider widget allows the user to select a float value.</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnSegmentQuickShift">
+            <property name="text">
+             <string>Segment</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </widget>
       </item>

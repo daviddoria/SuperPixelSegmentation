@@ -29,6 +29,7 @@
 #include "ITKComputationThread.h"
 #include "itkSLICSegmentation.h"
 #include "itkGraphCutSegmentation.h"
+#include "itkQuickShiftSegmentation.h"
 
 // Qt
 #include <QMainWindow>
@@ -53,6 +54,7 @@ public slots:
   
   void on_btnSegmentGraphCut_clicked();
   void on_btnSegmentSLIC_clicked();
+  void on_btnSegmentQuickShift_clicked();
   
   void on_chkShowInputImage_clicked();
   void on_chkShowColoredImage_clicked();
@@ -63,6 +65,7 @@ public slots:
 
   void slot_GraphCutComplete();
   void slot_SLICComplete();
+  void slot_QuickShiftComplete();
 
 protected:
 
@@ -91,6 +94,10 @@ protected:
   typedef itk::SLICSegmentation<ImageType, LabelImageType> SLICFilterType;
   SLICFilterType::Pointer SLICFilter;
   ITKComputationThread<SLICFilterType>* SLICThread;
+  
+  typedef itk::QuickShiftSegmentation<ImageType, LabelImageType> QuickShiftFilterType;
+  QuickShiftFilterType::Pointer QuickShiftFilter;
+  ITKComputationThread<QuickShiftFilterType>* QuickShiftThread;
 
 private:
   int MinSizeMin;

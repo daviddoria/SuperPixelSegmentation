@@ -58,14 +58,21 @@ void SuperPixelSegmentationGUI::DefaultConstructor()
   this->progressBar->setMaximum(0);
   this->progressBar->hide();
 
-  this->GraphCutFilter = GraphCutFilterType::New();
-  this->SLICFilter = SLICFilterType::New();
   
+  
+  this->QuickShiftFilter = QuickShiftFilterType::New();
+  this->QuickShiftThread = new ITKComputationThread<QuickShiftFilterType>;
+  connect(this->QuickShiftThread, SIGNAL(StartProgressBarSignal()), this, SLOT(slot_StartProgressBar()));
+  connect(this->QuickShiftThread, SIGNAL(StopProgressBarSignal()), this, SLOT(slot_StopProgressBar()));
+  connect(this->QuickShiftThread, SIGNAL(StopProgressBarSignal()), this, SLOT(slot_QuickShiftComplete()));
+  
+  this->GraphCutFilter = GraphCutFilterType::New();
   this->GraphCutThread = new ITKComputationThread<GraphCutFilterType>;
   connect(this->GraphCutThread, SIGNAL(StartProgressBarSignal()), this, SLOT(slot_StartProgressBar()));
   connect(this->GraphCutThread, SIGNAL(StopProgressBarSignal()), this, SLOT(slot_StopProgressBar()));
   connect(this->GraphCutThread, SIGNAL(StopProgressBarSignal()), this, SLOT(slot_GraphCutComplete()));
 
+  this->SLICFilter = SLICFilterType::New();
   this->SLICThread = new ITKComputationThread<SLICFilterType>;
   connect(this->SLICThread, SIGNAL(StartProgressBarSignal()), this, SLOT(slot_StartProgressBar()));
   connect(this->SLICThread, SIGNAL(StopProgressBarSignal()), this, SLOT(slot_StopProgressBar()));
@@ -121,6 +128,16 @@ void SuperPixelSegmentationGUI::on_btnSegmentGraphCut_clicked()
   GraphCutThread->SetFilter(this->GraphCutFilter);
   std::cout << "Starting graph cut thread..." << std::endl;
   GraphCutThread->start();
+}
+
+void SuperPixelSegmentationGUI::on_btnSegmentQuickShift_clicked()
+{
+  this->QuickShiftFilter->SetKernelSize(this->sldKernelSize->GetValue());
+  this->QuickShiftFilter->SetMaxDist(this->sldMaxDist->GetValue());
+  this->QuickShiftFilter->SetInput(this->Image);
+  QuickShiftThread->SetFilter(this->QuickShiftFilter);
+  std::cout << "Starting quick shift thread..." << std::endl;
+  QuickShiftThread->start();
 }
 
 void SuperPixelSegmentationGUI::on_btnSegmentSLIC_clicked()
@@ -203,17 +220,6 @@ void SuperPixelSegmentationGUI::slot_StopProgressBar()
 
 void SuperPixelSegmentationGUI::slot_GraphCutComplete()
 {
-//   std::stringstream ss;
-//   ss << "Computed " << numberOfSegments << " segments." << std::endl;
-//   this->statusBar()->showMessage(ss.str().c_str());
-
-//   QImage qimage = HelpersQt::GetQImageScalar<LabelImageType>(this->GraphCutFilter->GetLabelImage());
-//   if(this->LabelImagePixmapItem)
-//     {
-//     this->Scene->removeItem(this->LabelImagePixmapItem);
-//     }
-//   this->LabelImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qimage));
-  
   // Display label image
   typedef itk::ScalarToRGBColormapImageFilter<LabelImageType, ImageType> ColorMapFilterType;
   ColorMapFilterType::Pointer colorMapFilter = ColorMapFilterType::New();
@@ -241,13 +247,6 @@ void SuperPixelSegmentationGUI::slot_GraphCutComplete()
 
 void SuperPixelSegmentationGUI::slot_SLICComplete()
 {
-//   QImage qLabelImage = HelpersQt::GetQImageScalar<LabelImageType>(this->SLICFilter->GetLabelImage());
-//   if(this->LabelImagePixmapItem)
-//     {
-//     this->Scene->removeItem(this->LabelImagePixmapItem);
-//     }
-//   this->LabelImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qLabelImage));
-
   // Display label image
   typedef itk::ScalarToRGBColormapImageFilter<LabelImageType, ImageType> ColorMapFilterType;
   ColorMapFilterType::Pointer colorMapFilter = ColorMapFilterType::New();
@@ -265,6 +264,34 @@ void SuperPixelSegmentationGUI::slot_SLICComplete()
   // Display colored image
   
   QImage qColoredImage = HelpersQt::GetQImageRGB<ImageType>(this->SLICFilter->GetColoredImage());
+  if(this->ColoredImagePixmapItem)
+    {
+    this->Scene->removeItem(this->ColoredImagePixmapItem);
+    }
+  this->ColoredImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qColoredImage));
+
+  Refresh();
+}
+
+void SuperPixelSegmentationGUI::slot_QuickShiftComplete()
+{
+  // Display label image
+  typedef itk::ScalarToRGBColormapImageFilter<LabelImageType, ImageType> ColorMapFilterType;
+  ColorMapFilterType::Pointer colorMapFilter = ColorMapFilterType::New();
+  colorMapFilter->SetInput(this->QuickShiftFilter->GetLabelImage());
+  colorMapFilter->SetColormap( ColorMapFilterType::Hot );
+  colorMapFilter->Update();
+  
+  QImage qimage = HelpersQt::GetQImageRGB<ImageType>(colorMapFilter->GetOutput());
+  if(this->LabelImagePixmapItem)
+    {
+    this->Scene->removeItem(this->LabelImagePixmapItem);
+    }
+  this->LabelImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qimage));
+  
+  // Display colored image
+  
+  QImage qColoredImage = HelpersQt::GetQImageRGB<ImageType>(this->QuickShiftFilter->GetColoredImage());
   if(this->ColoredImagePixmapItem)
     {
     this->Scene->removeItem(this->ColoredImagePixmapItem);
