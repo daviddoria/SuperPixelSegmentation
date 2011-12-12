@@ -35,9 +35,6 @@ void SLICSegmentationComputationThread::Compute()
 
   this->Object->Compute();
 
-  //unsigned int num = dynamic_cast<SuperPixelSegmentationComputationObject<ImageT*>(this->Object)->FinalNumberOfSegments;
-  //emit IterationCompleteSignal();
-  //emit IterationCompleteSignal(dynamic_cast<SuperPixelSegmentationComputationObject*>(this->Object)->FinalNumberOfSegments);
   emit IterationCompleteSignal(this->Object->FinalNumberOfSegments);
 
   // When the function is finished, end the thread

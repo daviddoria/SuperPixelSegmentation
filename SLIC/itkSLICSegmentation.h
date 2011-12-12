@@ -28,12 +28,17 @@ public:
   itkSetMacro( SpatialDistanceWeight, float );
   itkGetMacro( SpatialDistanceWeight, float);
 
+  typename TInputImage::Pointer ContourImage;
+  typename TInputImage::Pointer GetContourImage();
+  
 protected:
   SLICSegmentation();
   ~SLICSegmentation(){}
 
   /** Does the real work. */
   virtual void GenerateData();
+
+  void DrawContoursAroundSegments(const typename TInputImage::PixelType color);
 
 private:
   // This function takes 4 unsigned chars and inserts them into an int (4x8bit = 32bit)
@@ -49,6 +54,8 @@ private:
 
   int m_NumberOfSuperPixels;
   float m_SpatialDistanceWeight;
+  
+  int* Labels;
 };
 } //namespace ITK
 

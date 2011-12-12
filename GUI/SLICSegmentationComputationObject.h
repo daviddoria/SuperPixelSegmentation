@@ -29,9 +29,8 @@ public:
   TImage* Image;
   TLabelImage* LabelImage;
 
-  float Sigma;
-  float K;
-  unsigned int MinSize;
+  float SpatialDistanceWeight;
+  unsigned int NumberOfSuperPixels;
 
 };
 

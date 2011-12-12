@@ -18,6 +18,6 @@ SLICSegmentationComputationThread.cpp
 ../Helpers.cpp
 HelpersQt.cpp
 ${SuperPixelSegmentationUISrcs} ${SuperPixelSegmentationMOCSrcs})
-TARGET_LINK_LIBRARIES(SuperPixelSegmentation ${ITK_LIBRARIES} umfpack ${QT_LIBRARIES} libGraphCut libCustomWidgets)
+TARGET_LINK_LIBRARIES(SuperPixelSegmentation ${ITK_LIBRARIES} umfpack ${QT_LIBRARIES} libGraphCut libSLIC libCustomWidgets)
 #set_target_properties(PoissonCloning PROPERTIES COMPILE_DEFINITIONS "${DEFINITIONS}")
 INSTALL( TARGETS SuperPixelSegmentation RUNTIME DESTINATION ${INSTALL_DIR} )

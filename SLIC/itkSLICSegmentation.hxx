@@ -26,6 +26,13 @@ SLICSegmentation< TInputImage, TOutputLabelImage>
 }
 
 template< typename TInputImage, typename TOutputLabelImage>
+typename TInputImage::Pointer SLICSegmentation< TInputImage, TOutputLabelImage>
+::GetContourImage()
+{
+  return this->ContourImage;
+}
+
+template< typename TInputImage, typename TOutputLabelImage>
 void SLICSegmentation< TInputImage, TOutputLabelImage>
 ::GenerateData()
 {
@@ -57,11 +64,11 @@ void SLICSegmentation< TInputImage, TOutputLabelImage>
 
   int numberOfPixels = width*height;
 
-  int* labels = new int[numberOfPixels];
+  this->Labels = new int[numberOfPixels];
   int numlabels(0);
   SLIC slic;
   
-  slic.DoSuperpixelSegmentation_ForGivenK(image->GetBufferPointer(), width, height, labels, numlabels, m_NumberOfSuperPixels, m_SpatialDistanceWeight);
+  slic.DoSuperpixelSegmentation_ForGivenK(image->GetBufferPointer(), width, height, this->Labels, numlabels, m_NumberOfSuperPixels, m_SpatialDistanceWeight);
   
   UnsignedIntImageType::Pointer labelImage = UnsignedIntImageType::New();
   labelImage->SetRegions(image->GetLargestPossibleRegion());
@@ -72,7 +79,7 @@ void SLICSegmentation< TInputImage, TOutputLabelImage>
   unsigned int labelId = 0;
   while(!labelIterator.IsAtEnd())
     {
-    labelIterator.Set(labels[labelId]);
+    labelIterator.Set(this->Labels[labelId]);
  
     ++labelIterator;
     labelId++;
@@ -87,10 +94,61 @@ void SLICSegmentation< TInputImage, TOutputLabelImage>
   //DrawContoursAroundSegments<RGBImageType>(reader->GetOutput(), labels, width, height, contourColor);
   //WriteImage<RGBImageType>(reader->GetOutput(), "ImageWithContours.png");
   
-//   DrawContoursAroundSegments(labelImage, labels, width, height);
+  Helpers::DeepCopy<TInputImage>(input, this->ContourImage);
+  
+  DrawContoursAroundSegments(contourColor);
 //   WriteImage<UnsignedIntImageType>(labelImage, "contours.mha");
   
 }
+
+template< typename TInputImage, typename TOutputLabelImage>
+void SLICSegmentation< TInputImage, TOutputLabelImage>
+::DrawContoursAroundSegments(const typename TInputImage::PixelType color)
+{
+        const int dx8[8] = {-1, -1,  0,  1, 1, 1, 0, -1};
+        const int dy8[8] = { 0, -1, -1, -1, 0, 1, 1,  1};
+
+        unsigned int width = this->ContourImage->GetLargestPossibleRegion().GetSize()[0];
+        unsigned int height = this->ContourImage->GetLargestPossibleRegion().GetSize()[1];
+        unsigned int sz = width*height;
+
+        std::vector<bool> istaken(sz, false);
+
+        int mainindex(0);
+        for( int j = 0; j < height; j++ )
+        {
+                for( int k = 0; k < width; k++ )
+                {
+                        int np(0);
+                        for( int i = 0; i < 8; i++ )
+                        {
+                                int x = k + dx8[i];
+                                int y = j + dy8[i];
+
+                                if( (x >= 0 && x < width) && (y >= 0 && y < height) )
+                                {
+                                        int index = y*width + x;
+
+                                        if( false == istaken[index] )//comment this to obtain internal contours
+                                        {
+                                                if( this->Labels[mainindex] != this->Labels[index] ) np++;
+                                        }
+                                }
+                        }
+                        if( np > 1 )//change to 2 or 3 for thinner lines
+                        {
+                          itk::Index<2> itkIndex;
+                          itkIndex[0] = k;
+                          itkIndex[1] = j;
+
+                          this->ContourImage->SetPixel(itkIndex, color);
+                          istaken[mainindex] = true;
+                        }
+                        mainindex++;
+                }
+        }
+}
+
 
 }// end namespace
 

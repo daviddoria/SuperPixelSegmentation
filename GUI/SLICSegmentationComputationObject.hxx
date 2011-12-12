@@ -9,13 +9,10 @@ void SLICSegmentationComputationObject<TImage, TLabelImage>::Compute()
 {
   typedef itk::SLICSegmentation<TImage, TLabelImage> SLICSegmentationType;
   typename SLICSegmentationType::Pointer slicSegmentation = SLICSegmentationType::New();
-  slicSegmentation->SetSigma(this->Sigma);
-  slicSegmentation->SetK(this->K);
-  slicSegmentation->SetMinSize(this->MinSize);
+  slicSegmentation->SetNumberOfSuperPixels(this->NumberOfSuperPixels);
+  slicSegmentation->SetSpatialDistanceWeight(this->SpatialDistanceWeight);
   slicSegmentation->SetInput(this->Image);
   slicSegmentation->Update();
 
-  this->FinalNumberOfSegments = slicSegmentation->FinalNumberOfSegments;
-  
   Helpers::DeepCopy<TLabelImage>(slicSegmentation->GetOutput(), this->LabelImage);
 }

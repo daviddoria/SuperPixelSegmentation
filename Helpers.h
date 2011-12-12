@@ -25,11 +25,14 @@
 namespace Helpers
 {
 
-template <class TImage>
-float MaxValue(const typename TImage::Pointer image);
+template <typename TImage, typename TLabelImage>
+void ColorLabelsByAverageColor(const TImage* image, const TLabelImage* labelImage, TImage* output);
+
+template <typename TImage>
+typename TImage::PixelType MaxValue(const TImage* image);
 
 template<typename TImage>
-unsigned int CountPixelsWithValue(const typename TImage::Pointer image, typename TImage::PixelType value);
+unsigned int CountPixelsWithValue(const TImage* image, typename TImage::PixelType value);
 
 template<typename T>
 void WriteRGBImage(const typename T::Pointer input, const std::string& filename);

@@ -177,7 +177,7 @@ void RelabelSequential(typename TImage::Pointer input, typename TImage::Pointer 
 }
 
 template<typename TImage>
-unsigned int CountPixelsWithValue(const typename TImage::Pointer image, typename TImage::PixelType value)
+unsigned int CountPixelsWithValue(const TImage* image, typename TImage::PixelType value)
 {
   itk::ImageRegionConstIterator<TImage> imageIterator(image, image->GetLargestPossibleRegion());
 
@@ -194,7 +194,7 @@ unsigned int CountPixelsWithValue(const typename TImage::Pointer image, typename
 }
 
 template <class TImage>
-float MaxValue(const typename TImage::Pointer image)
+typename TImage::PixelType MaxValue(const TImage* image)
 {
   typedef typename itk::MinimumMaximumImageCalculator<TImage>
           ImageCalculatorFilterType;
@@ -249,6 +249,88 @@ void BilateralAllChannels(const TVectorImage* image, TVectorImage* output, const
   imageToVectorImageFilter->Update();
  
   DeepCopy<TVectorImage>(imageToVectorImageFilter->GetOutput(), output);
+}
+
+template <typename TImage, typename TLabelImage>
+void ColorLabelsByAverageColor(const TImage* image, const TLabelImage* labelImage, TImage* output)
+{
+  output->SetRegions(labelImage->GetLargestPossibleRegion());
+  output->Allocate();
+
+  // Determine how many labels there are
+  unsigned int maxLabel = Helpers::MaxValue<TLabelImage>(labelImage);
+  
+  typedef itk::Vector<float, 3> FloatPixelType; // This should really be based on the input image pixel dimension
+  
+  FloatPixelType zeroFloatPixel;
+  zeroFloatPixel.Fill(0);
+  
+  // We have to use float pixels or we would cause overflows while summing
+  std::vector<FloatPixelType> segmentFloatColors(maxLabel + 1, zeroFloatPixel); // +1 because Labels start at 0
+  std::vector<unsigned int> labelCount(maxLabel + 1, 0); // +1 because Labels start at 0
+  
+  //std::cout << "Coloring label " << labelId << std::endl;
+  FloatPixelType floatColor;
+  itk::ImageRegionConstIterator<TLabelImage> labelIterator(labelImage, labelImage->GetLargestPossibleRegion());
+  
+  while(!labelIterator.IsAtEnd())
+    {
+    labelCount[labelIterator.Get()]++;
+    floatColor[0] = image->GetPixel(labelIterator.GetIndex())[0];
+    floatColor[1] = image->GetPixel(labelIterator.GetIndex())[1];
+    floatColor[2] = image->GetPixel(labelIterator.GetIndex())[2];
+    
+    segmentFloatColors[labelIterator.Get()] += floatColor;
+    ++labelIterator;
+    } // end while
+    
+  typename TImage::PixelType zeroPixel;
+  zeroPixel.Fill(0);
+  std::vector<typename TImage::PixelType> segmentColors(maxLabel + 1, zeroPixel); // +1 because Labels start at 0
+  for(unsigned int i = 0; i < segmentColors.size(); ++i)
+    {
+    typename TImage::PixelType colorPixel;
+    colorPixel[0] = segmentColors[i][0]/static_cast<float>(labelCount[i]);
+    colorPixel[1] = segmentColors[i][1]/static_cast<float>(labelCount[i]);
+    colorPixel[2] = segmentColors[i][2]/static_cast<float>(labelCount[i]);
+  
+    segmentColors[i] = colorPixel;
+    }
+
+  // This version takes many passes through the image - very slow
+//   for(unsigned int labelId = 0; labelId <= maxLabel; ++labelId) // <= because labels start at 0
+//     {
+//     //std::cout << "Coloring label " << labelId << std::endl;
+//     float rgb[3] = {0,0,0};
+//     itk::ImageRegionIterator<LabelImageType> labelIterator(this->LabelImage, this->LabelImage->GetLargestPossibleRegion());
+//     unsigned int counter = 0;
+//     while(!labelIterator.IsAtEnd())
+//       {
+//       if(labelIterator.Get() == labelId)
+//         {
+//         rgb[0] += this->Image->GetPixel(labelIterator.GetIndex())[0];
+//         rgb[1] += this->Image->GetPixel(labelIterator.GetIndex())[1];
+//         rgb[2] += this->Image->GetPixel(labelIterator.GetIndex())[2];
+//         counter++;
+//         }// end if
+//       ++labelIterator;
+//       } // end while
+//     RGBImageType::PixelType colorPixel;
+//     colorPixel[0] = rgb[0]/static_cast<float>(counter);
+//     colorPixel[1] = rgb[1]/static_cast<float>(counter);
+//     colorPixel[2] = rgb[2]/static_cast<float>(counter);
+//     segmentColors.push_back(colorPixel);
+//     } // end for
+    
+        
+  itk::ImageRegionConstIterator<TLabelImage> colorIterator(labelImage, labelImage->GetLargestPossibleRegion());
+  
+  while(!colorIterator.IsAtEnd())
+    {
+    output->SetPixel(colorIterator.GetIndex(), segmentColors[colorIterator.Get()]);
+
+    ++colorIterator;
+    } // end while
 }
 
 } // end namespace
