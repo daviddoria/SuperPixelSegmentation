@@ -75,28 +75,18 @@ void QuickShiftSegmentation< TInputImage, TOutputLabelImage>
   
   vl_qs_type* image = new vl_qs_type[totalPixels*channels];
   
-  
-  for(unsigned int channel = 0; channel < channels; ++channel)
+  itk::ImageRegionIterator<TInputImage> inputIterator(input, input->GetLargestPossibleRegion());
+
+  while(!inputIterator.IsAtEnd())
     {
-    for (unsigned int y = 0 ; y < height ; ++y)
+    for (unsigned int component = 0; component < input->GetNumberOfComponentsPerPixel(); ++component) 
       {
-      for (unsigned int x = 0  ; x < width ; ++x) 
-        {
-        unsigned int linearIndex = ComputeLinearValueIndex(y, x, width, height, channel);
-        //std::cout << "linearIndex: " << linearIndex << std::endl;
-        float noise = drand48()/10.0f;
-        if(x <= 1)
-          {
-          //image[linearIndex] = 255;
-          image[linearIndex] = 1.0 + noise;
-          image[linearIndex] *= this->m_Ratio;
-          }
-        else
-          {
-          image[linearIndex] = 0 + noise;
-          }
-        }
+      unsigned int linearIndex = ComputeLinearValueIndex(inputIterator.GetIndex()[1], inputIterator.GetIndex()[0], width, height, component);
+      //std::cout << "linearIndex: " << linearIndex << std::endl;
+      //float noise = 255.0f * drand48();
+      image[linearIndex] = inputIterator.Get()[component] * this->m_Ratio;
       }
+    ++inputIterator;
     }
 
   // Create a new quick shift object
@@ -105,7 +95,7 @@ void QuickShiftSegmentation< TInputImage, TOutputLabelImage>
   // Configure quick shift by setting the kernel size (vl_quickshift_set_kernel_size)
   // and the maximum gap (vl_quickshift_set_max_dist).
   // The latter is in principle not necessary, but useful to speedup processing.
-
+  std::cout << "vl_quickshift kernel: " << m_KernelSize << " dist: " << m_MaxDist << std::endl;
   vl_quickshift_set_kernel_size(quickshift, this->m_KernelSize);
 
   vl_quickshift_set_max_dist(quickshift, this->m_MaxDist);

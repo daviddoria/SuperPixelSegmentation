@@ -160,6 +160,11 @@ void SuperPixelSegmentationGUI::on_btnSegmentGraphCut_clicked()
 
 void SuperPixelSegmentationGUI::on_btnSegmentQuickShift_clicked()
 {
+  std::cout << "Running quickshift with:" << std::endl;
+  std::cout << "KernelSize: " << this->sldKernelSize->GetValue() << std::endl;
+  std::cout << "MaxDist: " << this->sldMaxDist->GetValue() << std::endl;
+  std::cout << "Ratio: " << this->sldRatio->GetValue() << std::endl;
+  
   this->QuickShiftFilter->SetKernelSize(this->sldKernelSize->GetValue());
   this->QuickShiftFilter->SetMaxDist(this->sldMaxDist->GetValue());
   this->QuickShiftFilter->SetRatio(this->sldRatio->GetValue());
