@@ -79,19 +79,19 @@ void WriteScaledScalarImage(const typename T::Pointer image, const std::string& 
 }
 
 
-template<typename T>
-void WriteImage(const typename T::Pointer image, const std::string& filename)
+template<typename TImage>
+void WriteImage(const TImage* image, const std::string& filename)
 {
   // This is a convenience function so that images can be written in 1 line instead of 4.
-  typename itk::ImageFileWriter<T>::Pointer writer = itk::ImageFileWriter<T>::New();
+  typename itk::ImageFileWriter<TImage>::Pointer writer = itk::ImageFileWriter<TImage>::New();
   writer->SetFileName(filename);
   writer->SetInput(image);
   writer->Update();
 }
 
 
-template<typename T>
-void WriteRGBImage(const typename T::Pointer input, const std::string& filename)
+template<typename TImage>
+void WriteRGBImage(const TImage* input, const std::string& filename)
 {
   typedef itk::Image<itk::CovariantVector<unsigned char, 3>, 2> RGBImageType;
 
@@ -99,7 +99,7 @@ void WriteRGBImage(const typename T::Pointer input, const std::string& filename)
   output->SetRegions(input->GetLargestPossibleRegion());
   output->Allocate();
 
-  itk::ImageRegionConstIterator<T> inputIterator(input, input->GetLargestPossibleRegion());
+  itk::ImageRegionConstIterator<TImage> inputIterator(input, input->GetLargestPossibleRegion());
   itk::ImageRegionIterator<RGBImageType> outputIterator(output, output->GetLargestPossibleRegion());
 
   while(!inputIterator.IsAtEnd())
@@ -255,6 +255,7 @@ template <typename TImage, typename TLabelImage>
 void ColorLabelsByAverageColor(const TImage* image, const TLabelImage* labelImage, TImage* output)
 {
   output->SetRegions(labelImage->GetLargestPossibleRegion());
+  output->SetNumberOfComponentsPerPixel(image->GetNumberOfComponentsPerPixel());
   output->Allocate();
 
   // Determine how many labels there are
@@ -267,7 +268,7 @@ void ColorLabelsByAverageColor(const TImage* image, const TLabelImage* labelImag
   
   typedef itk::VariableLengthVector<float> FloatPixelType;
   FloatPixelType zeroFloatPixel;
-  zeroFloatPixel.SetSize(3);
+  zeroFloatPixel.SetSize(image->GetNumberOfComponentsPerPixel());
   zeroFloatPixel.Fill(0);
   
   // We have to use float pixels or we would cause overflows while summing
@@ -276,6 +277,8 @@ void ColorLabelsByAverageColor(const TImage* image, const TLabelImage* labelImag
   
   //std::cout << "Coloring label " << labelId << std::endl;
   FloatPixelType floatColor;
+  floatColor.SetSize(image->GetNumberOfComponentsPerPixel());
+  floatColor.Fill(0);
   itk::ImageRegionConstIterator<TLabelImage> labelIterator(labelImage, labelImage->GetLargestPossibleRegion());
   
   while(!labelIterator.IsAtEnd())
@@ -290,16 +293,20 @@ void ColorLabelsByAverageColor(const TImage* image, const TLabelImage* labelImag
     } // end while
     
   typename TImage::PixelType zeroPixel;
-  zeroPixel.SetSize(3);
+  zeroPixel.SetSize(image->GetNumberOfComponentsPerPixel());
   zeroPixel.Fill(0);
   std::vector<typename TImage::PixelType> segmentColors(maxLabel + 1, zeroPixel); // +1 because Labels start at 0
+  
+  typename TImage::PixelType colorPixel;
+  colorPixel.SetSize(image->GetNumberOfComponentsPerPixel());
+  colorPixel.Fill(0);
+  
   for(unsigned int i = 0; i < segmentColors.size(); ++i)
     {
-    typename TImage::PixelType colorPixel;
-    colorPixel[0] = segmentColors[i][0]/static_cast<float>(labelCount[i]);
-    colorPixel[1] = segmentColors[i][1]/static_cast<float>(labelCount[i]);
-    colorPixel[2] = segmentColors[i][2]/static_cast<float>(labelCount[i]);
-  
+    colorPixel[0] = segmentFloatColors[i][0]/static_cast<float>(labelCount[i]);
+    colorPixel[1] = segmentFloatColors[i][1]/static_cast<float>(labelCount[i]);
+    colorPixel[2] = segmentFloatColors[i][2]/static_cast<float>(labelCount[i]);
+
     segmentColors[i] = colorPixel;
     }
 

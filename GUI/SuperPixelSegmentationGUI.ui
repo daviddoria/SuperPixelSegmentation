@@ -172,7 +172,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
-         <widget class="QCheckBox" name="chkShowInput">
+         <widget class="QCheckBox" name="chkShowInputImage">
           <property name="text">
            <string>Input</string>
           </property>
@@ -182,9 +182,9 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="chkShowSegments">
+         <widget class="QCheckBox" name="chkShowLabelImage">
           <property name="text">
-           <string>Segments</string>
+           <string>Labels</string>
           </property>
           <property name="checked">
            <bool>true</bool>

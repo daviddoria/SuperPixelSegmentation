@@ -21,8 +21,6 @@
 // Custom
 #include "Helpers.h"
 #include "HelpersQt.h"
-#include "GraphCutSegmentationComputationObject.h"
-#include "SLICSegmentationComputationObject.h"
 
 // ITK
 #include "itkImageFileReader.h"
@@ -55,20 +53,23 @@ void SuperPixelSegmentationGUI::DefaultConstructor()
   this->sldGraphCutSigma->setMinimum(this->SigmaMin);
   this->sldGraphCutSigma->setMaximum(this->SigmaMax);
   
+  // Marquee mode
   this->progressBar->setMinimum(0);
   this->progressBar->setMaximum(0);
   this->progressBar->hide();
 
-  this->GraphCutThread = new GraphCutSegmentationComputationThread;
+  this->GraphCutFilter = GraphCutFilterType::New();
+  this->SLICFilter = SLICFilterType::New();
+  
+  this->GraphCutThread = new ITKComputationThread<GraphCutFilterType>;
   connect(this->GraphCutThread, SIGNAL(StartProgressBarSignal()), this, SLOT(slot_StartProgressBar()));
   connect(this->GraphCutThread, SIGNAL(StopProgressBarSignal()), this, SLOT(slot_StopProgressBar()));
-  //connect(this->ComputationThread, SIGNAL(IterationCompleteSignal()), this, SLOT(slot_IterationComplete()));
-  connect(this->GraphCutThread, SIGNAL(IterationCompleteSignal(unsigned int)), this, SLOT(slot_GraphCutComplete(unsigned int)));
+  connect(this->GraphCutThread, SIGNAL(StopProgressBarSignal()), this, SLOT(slot_GraphCutComplete()));
 
-  this->SLICThread = new SLICSegmentationComputationThread;
+  this->SLICThread = new ITKComputationThread<SLICFilterType>;
   connect(this->SLICThread, SIGNAL(StartProgressBarSignal()), this, SLOT(slot_StartProgressBar()));
   connect(this->SLICThread, SIGNAL(StopProgressBarSignal()), this, SLOT(slot_StopProgressBar()));
-  connect(this->SLICThread, SIGNAL(IterationCompleteSignal()), this, SLOT(slot_SLICComplete(unsigned int)));
+  connect(this->SLICThread, SIGNAL(StopProgressBarSignal()), this, SLOT(slot_SLICComplete()));
   
   this->Image = ImageType::New();
   this->LabelImage = LabelImageType::New();
@@ -76,8 +77,9 @@ void SuperPixelSegmentationGUI::DefaultConstructor()
   this->Scene = new QGraphicsScene;
   this->graphicsView->setScene(this->Scene);
 
-  this->ImagePixmapItem = NULL;
+  this->InputImagePixmapItem = NULL;
   this->LabelImagePixmapItem = NULL;
+  this->ColoredImagePixmapItem = NULL;
 }
 
 // Default constructor
@@ -96,42 +98,38 @@ SuperPixelSegmentationGUI::SuperPixelSegmentationGUI(const std::string& imageFil
 
 void SuperPixelSegmentationGUI::showEvent ( QShowEvent * event )
 {
-  if(this->ImagePixmapItem)
+  if(this->InputImagePixmapItem)
     {
-    this->graphicsView->fitInView(this->ImagePixmapItem, Qt::KeepAspectRatio);
+    this->graphicsView->fitInView(this->InputImagePixmapItem, Qt::KeepAspectRatio);
     }
 }
 
 void SuperPixelSegmentationGUI::resizeEvent ( QResizeEvent * event )
 {
-  if(this->ImagePixmapItem)
+  if(this->InputImagePixmapItem)
     {
-    this->graphicsView->fitInView(this->ImagePixmapItem, Qt::KeepAspectRatio);
+    this->graphicsView->fitInView(this->InputImagePixmapItem, Qt::KeepAspectRatio);
     }
 }
 
 void SuperPixelSegmentationGUI::on_btnSegmentGraphCut_clicked()
 {
-  GraphCutSegmentationComputationObject<ImageType, LabelImageType>* computationObject =
-    new GraphCutSegmentationComputationObject<ImageType, LabelImageType>;
-  computationObject->K = this->sldGraphCutK->GetValue();
-  computationObject->Sigma = this->sldGraphCutSigma->GetValue();
-  computationObject->MinSize = this->sldGraphCutMinSize->value();
-  computationObject->Image = this->Image;
-  computationObject->LabelImage = this->LabelImage;
-  GraphCutThread->SetObject(computationObject);
+  this->GraphCutFilter->SetK(this->sldGraphCutK->GetValue());
+  this->GraphCutFilter->SetSigma(this->sldGraphCutSigma->GetValue());
+  this->GraphCutFilter->SetMinSize(this->sldGraphCutMinSize->value());
+  this->GraphCutFilter->SetInput(this->Image);
+  GraphCutThread->SetFilter(this->GraphCutFilter);
+  std::cout << "Starting graph cut thread..." << std::endl;
   GraphCutThread->start();
 }
 
 void SuperPixelSegmentationGUI::on_btnSegmentSLIC_clicked()
 {
-  SLICSegmentationComputationObject<ImageType, LabelImageType>* computationObject =
-    new SLICSegmentationComputationObject<ImageType, LabelImageType>;
-  computationObject->SpatialDistanceWeight = this->sldSLICSpatialDistanceWeight->GetValue();
-  computationObject->NumberOfSuperPixels = this->sldSLICNumberOfSuperPixels->value();
-  computationObject->Image = this->Image;
-  computationObject->LabelImage = this->LabelImage;
-  SLICThread->SetObject(computationObject);
+  this->SLICFilter->SetSpatialDistanceWeight(this->sldSLICSpatialDistanceWeight->GetValue());
+  this->SLICFilter->SetNumberOfSuperPixels(this->sldSLICNumberOfSuperPixels->value());
+  this->SLICFilter->SetInput(this->Image);
+  SLICThread->SetFilter(this->SLICFilter);
+  std::cout << "Starting SLIC thread..." << std::endl;
   SLICThread->start();
 }
 
@@ -161,8 +159,8 @@ void SuperPixelSegmentationGUI::OpenImage(const std::string& imageFileName)
   Helpers::DeepCopy<ImageType>(imageReader->GetOutput(), this->Image);
 
   QImage qimageImage = HelpersQt::GetQImageRGBA<ImageType>(this->Image);
-  this->ImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qimageImage));
-  this->graphicsView->fitInView(this->ImagePixmapItem);
+  this->InputImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qimageImage));
+  this->graphicsView->fitInView(this->InputImagePixmapItem);
   Refresh();
 }
 
@@ -177,12 +175,17 @@ void SuperPixelSegmentationGUI::on_actionOpenImage_activated()
     }
 }
 
-void SuperPixelSegmentationGUI::on_chkShowInput_clicked()
+void SuperPixelSegmentationGUI::on_chkShowInputImage_clicked()
 {
   Refresh();
 }
 
-void SuperPixelSegmentationGUI::on_chkShowSegments_clicked()
+void SuperPixelSegmentationGUI::on_chkShowLabelImage_clicked()
+{
+  Refresh();
+}
+
+void SuperPixelSegmentationGUI::on_chkShowColoredImage_clicked()
 {
   Refresh();
 }
@@ -198,68 +201,91 @@ void SuperPixelSegmentationGUI::slot_StopProgressBar()
 }
 
 
-void SuperPixelSegmentationGUI::slot_GraphCutComplete(unsigned int numberOfSegments)
+void SuperPixelSegmentationGUI::slot_GraphCutComplete()
 {
-  std::stringstream ss;
-  ss << "Computed " << numberOfSegments << " segments." << std::endl;
-  this->statusBar()->showMessage(ss.str().c_str());
+//   std::stringstream ss;
+//   ss << "Computed " << numberOfSegments << " segments." << std::endl;
+//   this->statusBar()->showMessage(ss.str().c_str());
 
-  QImage qimage = HelpersQt::GetQImageRGB<ImageType>(GraphCutThread->GetO);
+//   QImage qimage = HelpersQt::GetQImageScalar<LabelImageType>(this->GraphCutFilter->GetLabelImage());
+//   if(this->LabelImagePixmapItem)
+//     {
+//     this->Scene->removeItem(this->LabelImagePixmapItem);
+//     }
+//   this->LabelImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qimage));
+  
+  // Display label image
+  typedef itk::ScalarToRGBColormapImageFilter<LabelImageType, ImageType> ColorMapFilterType;
+  ColorMapFilterType::Pointer colorMapFilter = ColorMapFilterType::New();
+  colorMapFilter->SetInput(this->GraphCutFilter->GetLabelImage());
+  colorMapFilter->SetColormap( ColorMapFilterType::Hot );
+  colorMapFilter->Update();
+  
+  QImage qimage = HelpersQt::GetQImageRGB<ImageType>(colorMapFilter->GetOutput());
   if(this->LabelImagePixmapItem)
     {
     this->Scene->removeItem(this->LabelImagePixmapItem);
     }
   this->LabelImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qimage));
 
+  // Display colored image
+  QImage qColoredImage = HelpersQt::GetQImageRGB<ImageType>(this->GraphCutFilter->GetColoredImage());
+  if(this->ColoredImagePixmapItem)
+    {
+    this->Scene->removeItem(this->ColoredImagePixmapItem);
+    }
+  this->ColoredImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qColoredImage));
+  
   Refresh();
 }
 
 void SuperPixelSegmentationGUI::slot_SLICComplete()
 {
-  QImage qimage = HelpersQt::GetQImageRGB<ImageType>(coloredLabelImage);
-  if(this->LabelImagePixmapItem)
-    {
-    this->Scene->removeItem(this->LabelImagePixmapItem);
-    }
-  this->LabelImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qimage));
+//   QImage qLabelImage = HelpersQt::GetQImageScalar<LabelImageType>(this->SLICFilter->GetLabelImage());
+//   if(this->LabelImagePixmapItem)
+//     {
+//     this->Scene->removeItem(this->LabelImagePixmapItem);
+//     }
+//   this->LabelImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qLabelImage));
 
-  Refresh();
-}
-
-/*
-void SuperPixelSegmentationGUI::slot_IterationComplete()
-{
-  //Helpers::WriteImage<LabelImageType>(this->LabelImage, "LabelImage.mha");
-  //QImage qimage = HelpersQt::GetQImageScalar<LabelImageType>(this->LabelImage);
-
-  
-  typedef itk::Image<itk::RGBPixel<unsigned char>, 2> RGBImageType;
-  typedef itk::ScalarToRGBColormapImageFilter<LabelImageType, RGBImageType> ColorMapFilterType;
+  // Display label image
+  typedef itk::ScalarToRGBColormapImageFilter<LabelImageType, ImageType> ColorMapFilterType;
   ColorMapFilterType::Pointer colorMapFilter = ColorMapFilterType::New();
-  colorMapFilter->SetInput(this->LabelImage);
+  colorMapFilter->SetInput(this->SLICFilter->GetLabelImage());
   colorMapFilter->SetColormap( ColorMapFilterType::Hot );
   colorMapFilter->Update();
-
-  QImage qimage = HelpersQt::GetQImageRGB<RGBImageType>(colorMapFilter->GetOutput());
+  
+  QImage qimage = HelpersQt::GetQImageRGB<ImageType>(colorMapFilter->GetOutput());
   if(this->LabelImagePixmapItem)
     {
     this->Scene->removeItem(this->LabelImagePixmapItem);
     }
   this->LabelImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qimage));
-
   
+  // Display colored image
+  
+  QImage qColoredImage = HelpersQt::GetQImageRGB<ImageType>(this->SLICFilter->GetColoredImage());
+  if(this->ColoredImagePixmapItem)
+    {
+    this->Scene->removeItem(this->ColoredImagePixmapItem);
+    }
+  this->ColoredImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qColoredImage));
+
   Refresh();
 }
-*/
 
 void SuperPixelSegmentationGUI::Refresh()
 {
   if(this->LabelImagePixmapItem)
     {
-    this->LabelImagePixmapItem->setVisible(this->chkShowSegments->isChecked());
+    this->LabelImagePixmapItem->setVisible(this->chkShowLabelImage->isChecked());
     }
-  if(this->ImagePixmapItem)
+  if(this->InputImagePixmapItem)
     {
-    this->ImagePixmapItem->setVisible(this->chkShowInput->isChecked());
+    this->InputImagePixmapItem->setVisible(this->chkShowInputImage->isChecked());
+    }
+  if(this->ColoredImagePixmapItem)
+    {
+    this->ColoredImagePixmapItem->setVisible(this->chkShowColoredImage->isChecked());
     }
 }

@@ -92,10 +92,6 @@ void GraphCutSegmentation< TInputImage, TOutputLabelImage>
     }
 
   Helpers::WriteImage<TInputImage>(input, "finalInput.mha");
-  
-  typename TOutputLabelImage::Pointer outputLabelImage = this->GetLabelImage();
-  outputLabelImage->SetRegions(input->GetLargestPossibleRegion());
-  outputLabelImage->Allocate();
 
   itk::Size<2> size = input->GetLargestPossibleRegion().GetSize();
   //std::cout << "Size: " << size << std::endl;
@@ -124,7 +120,11 @@ void GraphCutSegmentation< TInputImage, TOutputLabelImage>
 
   std::cout << "There were " << numberOfSegments << " segments." << std::endl;
   this->FinalNumberOfSegments = numberOfSegments;
-  
+
+  typename TOutputLabelImage::Pointer outputLabelImage = this->GetLabelImage();
+  outputLabelImage->SetRegions(input->GetLargestPossibleRegion());
+  outputLabelImage->Allocate();
+
   itk::ImageRegionIterator<TOutputLabelImage> outputIterator(outputLabelImage, outputLabelImage->GetLargestPossibleRegion());
 
   while(!outputIterator.IsAtEnd())

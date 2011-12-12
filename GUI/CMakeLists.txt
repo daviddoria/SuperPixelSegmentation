@@ -9,12 +9,9 @@ include_directories(Widgets)
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 QT4_WRAP_UI(SuperPixelSegmentationUISrcs SuperPixelSegmentationGUI.ui)
-QT4_WRAP_CPP(SuperPixelSegmentationMOCSrcs SuperPixelSegmentationGUI.h GraphCutSegmentationComputationThread.h SLICSegmentationComputationThread.h ComputationThread.h)
+QT4_WRAP_CPP(SuperPixelSegmentationMOCSrcs SuperPixelSegmentationGUI.h ITKComputationThread.h)
 
 ADD_EXECUTABLE(SuperPixelSegmentation SuperPixelSegmentation.cpp SuperPixelSegmentationGUI.cpp
-ComputationThread.cpp 
-GraphCutSegmentationComputationThread.cpp
-SLICSegmentationComputationThread.cpp
 ../Helpers.cpp
 HelpersQt.cpp
 ${SuperPixelSegmentationUISrcs} ${SuperPixelSegmentationMOCSrcs})

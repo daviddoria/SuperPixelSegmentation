@@ -26,8 +26,9 @@
 #include "itkVectorImage.h"
 
 // Custom
-#include "GraphCutSegmentationComputationThread.h"
-#include "SLICSegmentationComputationThread.h"
+#include "ITKComputationThread.h"
+#include "itkSLICSegmentation.h"
+#include "itkGraphCutSegmentation.h"
 
 // Qt
 #include <QMainWindow>
@@ -53,12 +54,14 @@ public slots:
   void on_btnSegmentGraphCut_clicked();
   void on_btnSegmentSLIC_clicked();
   
-  void on_chkShowInput_clicked();
-  void on_chkShowSegments_clicked();
+  void on_chkShowInputImage_clicked();
+  void on_chkShowColoredImage_clicked();
+  void on_chkShowLabelImage_clicked();
 
   void slot_StartProgressBar();
   void slot_StopProgressBar();
-  void slot_GraphCutComplete(unsigned int);
+
+  void slot_GraphCutComplete();
   void slot_SLICComplete();
 
 protected:
@@ -73,16 +76,21 @@ protected:
   LabelImageType::Pointer LabelImage;
   ImageType::Pointer Image;
 
-  QGraphicsPixmapItem* ImagePixmapItem;
+  QGraphicsPixmapItem* InputImagePixmapItem;
   QGraphicsPixmapItem* LabelImagePixmapItem;
+  QGraphicsPixmapItem* ColoredImagePixmapItem;
   
   QGraphicsScene* Scene;
 
   std::string SourceImageFileName;
 
-
-  GraphCutSegmentationComputationThread* GraphCutThread;
-  SLICSegmentationComputationThread* SLICThread;
+  typedef itk::GraphCutSegmentation<ImageType, LabelImageType> GraphCutFilterType;
+  GraphCutFilterType::Pointer GraphCutFilter;
+  ITKComputationThread<GraphCutFilterType>* GraphCutThread;
+  
+  typedef itk::SLICSegmentation<ImageType, LabelImageType> SLICFilterType;
+  SLICFilterType::Pointer SLICFilter;
+  ITKComputationThread<SLICFilterType>* SLICThread;
 
 private:
   int MinSizeMin;

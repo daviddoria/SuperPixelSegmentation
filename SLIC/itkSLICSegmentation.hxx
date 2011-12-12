@@ -75,11 +75,7 @@ template< typename TInputImage, typename TOutputLabelImage>
 void SLICSegmentation< TInputImage, TOutputLabelImage>
 ::GenerateData()
 {
-  //typename TInputImage::ConstPointer input = this->GetInput();
-  //typename TInputImage::ConstPointer input = const_cast<typename TInputImage::Pointer>(this->GetInput());
   TInputImage* input = const_cast<TInputImage*>(this->GetInput());
-  //TInputImage* input = this->GetInput(); // doesn't work
-  //const_cast<TInputImage*>(filterInput.GetPointer());
 
   // The SLIC implementation expects RGB values packed into int pixels.
   typedef itk::Image<unsigned int, 2> UnsignedIntImageType;
@@ -127,7 +123,7 @@ void SLICSegmentation< TInputImage, TOutputLabelImage>
 
   Helpers::RelabelSequential<TOutputLabelImage>(outputLabelImage, outputLabelImage); // This is the 0th output port of the filter
   
-  //WriteImage<UnsignedIntImageType>(labelImage, "output.mha");
+  Helpers::WriteImage<TOutputLabelImage>(outputLabelImage, "SLIC_LabelImage.mha");
   
   typename TInputImage::PixelType contourColor;
   contourColor.SetSize(3);
@@ -138,6 +134,7 @@ void SLICSegmentation< TInputImage, TOutputLabelImage>
   DrawContoursAroundSegments(contourColor);
   
   Helpers::ColorLabelsByAverageColor<TInputImage, TOutputLabelImage>(input, this->GetLabelImage(), this->GetColoredImage());
+  Helpers::WriteImage<TInputImage>(this->GetColoredImage(), "SLIC_ColoredImage.mha");
 }
 
 template< typename TInputImage, typename TOutputLabelImage>
