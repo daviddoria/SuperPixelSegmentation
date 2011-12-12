@@ -27,7 +27,7 @@ class SLICSegmentationComputationThread : public ComputationThreadClass
 {
 Q_OBJECT
 signals:
-  void IterationCompleteSignal(unsigned int);
+  void IterationCompleteSignal();
   
 public:
   SLICSegmentationComputationThread();

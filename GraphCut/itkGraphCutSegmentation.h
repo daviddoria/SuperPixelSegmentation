@@ -36,6 +36,9 @@ public:
   itkSetMacro( BlurFirst, bool);
   itkGetMacro( BlurFirst, bool);
   
+  TOutputLabelImage* GetLabelImage();
+  TInputImage* GetColoredImage();
+  
   unsigned int FinalNumberOfSegments;
   
 protected:
@@ -44,6 +47,8 @@ protected:
 
   /** Does the real work. */
   virtual void GenerateData();
+  
+  DataObject::Pointer MakeOutput(unsigned int idx);
 
 private:
   GraphCutSegmentation(const Self &); //purposely not implemented

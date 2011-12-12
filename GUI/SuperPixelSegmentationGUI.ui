@@ -191,6 +191,13 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QCheckBox" name="chkShowColoredImage">
+          <property name="text">
+           <string>Colored</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>

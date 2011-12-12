@@ -28,8 +28,9 @@ public:
   itkSetMacro( SpatialDistanceWeight, float );
   itkGetMacro( SpatialDistanceWeight, float);
 
-  typename TInputImage::Pointer ContourImage;
-  typename TInputImage::Pointer GetContourImage();
+  TOutputLabelImage* GetLabelImage();
+  TInputImage* GetContourImage();
+  TInputImage* GetColoredImage();
   
 protected:
   SLICSegmentation();
@@ -37,6 +38,8 @@ protected:
 
   /** Does the real work. */
   virtual void GenerateData();
+
+  DataObject::Pointer MakeOutput(unsigned int idx);
 
   void DrawContoursAroundSegments(const typename TInputImage::PixelType color);
 

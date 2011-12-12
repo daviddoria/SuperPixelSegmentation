@@ -27,6 +27,7 @@
 
 // Custom
 #include "GraphCutSegmentationComputationThread.h"
+#include "SLICSegmentationComputationThread.h"
 
 // Qt
 #include <QMainWindow>
@@ -57,7 +58,8 @@ public slots:
 
   void slot_StartProgressBar();
   void slot_StopProgressBar();
-  void slot_IterationComplete(unsigned int);
+  void slot_GraphCutComplete(unsigned int);
+  void slot_SLICComplete();
 
 protected:
 
@@ -79,7 +81,8 @@ protected:
   std::string SourceImageFileName;
 
 
-  GraphCutSegmentationComputationThread* ComputationThread;
+  GraphCutSegmentationComputationThread* GraphCutThread;
+  SLICSegmentationComputationThread* SLICThread;
 
 private:
   int MinSizeMin;

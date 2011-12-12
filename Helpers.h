@@ -16,8 +16,8 @@
  *
  *=========================================================================*/
 
-#ifndef HELPERS_OUTPUT_H
-#define HELPERS_OUTPUT_H
+#ifndef HELPERS_H
+#define HELPERS_H
 
 // ITK
 #include "itkVectorImage.h"
@@ -34,17 +34,17 @@ typename TImage::PixelType MaxValue(const TImage* image);
 template<typename TImage>
 unsigned int CountPixelsWithValue(const TImage* image, typename TImage::PixelType value);
 
-template<typename T>
-void WriteRGBImage(const typename T::Pointer input, const std::string& filename);
+template<typename TImage>
+void WriteRGBImage(const TImage* input, const std::string& filename);
 
-template <class T>
-void WriteScaledScalarImage(const typename T::Pointer image, std::string filename);
-
-template<typename T>
-void WriteImage(const typename T::Pointer image, const std::string& filename);
+template <class TImage>
+void WriteScaledScalarImage(const TImage* image, std::string filename);
 
 template<typename TImage>
-void WriteRegion(const typename TImage::Pointer image, const itk::ImageRegion<2>& region, const std::string& filename);
+void WriteImage(const TImage* image, const std::string& filename);
+
+template<typename TImage>
+void WriteRegion(const TImage* image, const itk::ImageRegion<2>& region, const std::string& filename);
 
 template<typename TImage>
 void DeepCopy(const TImage* input, TImage* output);

@@ -59,12 +59,17 @@ void SuperPixelSegmentationGUI::DefaultConstructor()
   this->progressBar->setMaximum(0);
   this->progressBar->hide();
 
-  this->ComputationThread = new GraphCutSegmentationComputationThread;
-  connect(this->ComputationThread, SIGNAL(StartProgressBarSignal()), this, SLOT(slot_StartProgressBar()));
-  connect(this->ComputationThread, SIGNAL(StopProgressBarSignal()), this, SLOT(slot_StopProgressBar()));
+  this->GraphCutThread = new GraphCutSegmentationComputationThread;
+  connect(this->GraphCutThread, SIGNAL(StartProgressBarSignal()), this, SLOT(slot_StartProgressBar()));
+  connect(this->GraphCutThread, SIGNAL(StopProgressBarSignal()), this, SLOT(slot_StopProgressBar()));
   //connect(this->ComputationThread, SIGNAL(IterationCompleteSignal()), this, SLOT(slot_IterationComplete()));
-  connect(this->ComputationThread, SIGNAL(IterationCompleteSignal(unsigned int)), this, SLOT(slot_IterationComplete(unsigned int)));
+  connect(this->GraphCutThread, SIGNAL(IterationCompleteSignal(unsigned int)), this, SLOT(slot_GraphCutComplete(unsigned int)));
 
+  this->SLICThread = new SLICSegmentationComputationThread;
+  connect(this->SLICThread, SIGNAL(StartProgressBarSignal()), this, SLOT(slot_StartProgressBar()));
+  connect(this->SLICThread, SIGNAL(StopProgressBarSignal()), this, SLOT(slot_StopProgressBar()));
+  connect(this->SLICThread, SIGNAL(IterationCompleteSignal()), this, SLOT(slot_SLICComplete(unsigned int)));
+  
   this->Image = ImageType::New();
   this->LabelImage = LabelImageType::New();
 
@@ -114,8 +119,8 @@ void SuperPixelSegmentationGUI::on_btnSegmentGraphCut_clicked()
   computationObject->MinSize = this->sldGraphCutMinSize->value();
   computationObject->Image = this->Image;
   computationObject->LabelImage = this->LabelImage;
-  ComputationThread->SetObject(computationObject);
-  ComputationThread->start();
+  GraphCutThread->SetObject(computationObject);
+  GraphCutThread->start();
 }
 
 void SuperPixelSegmentationGUI::on_btnSegmentSLIC_clicked()
@@ -126,8 +131,8 @@ void SuperPixelSegmentationGUI::on_btnSegmentSLIC_clicked()
   computationObject->NumberOfSuperPixels = this->sldSLICNumberOfSuperPixels->value();
   computationObject->Image = this->Image;
   computationObject->LabelImage = this->LabelImage;
-  ComputationThread->SetObject(computationObject);
-  ComputationThread->start();
+  SLICThread->SetObject(computationObject);
+  SLICThread->start();
 }
 
 void SuperPixelSegmentationGUI::on_actionSaveResult_activated()
@@ -193,15 +198,24 @@ void SuperPixelSegmentationGUI::slot_StopProgressBar()
 }
 
 
-void SuperPixelSegmentationGUI::slot_IterationComplete(unsigned int numberOfSegments)
+void SuperPixelSegmentationGUI::slot_GraphCutComplete(unsigned int numberOfSegments)
 {
   std::stringstream ss;
   ss << "Computed " << numberOfSegments << " segments." << std::endl;
   this->statusBar()->showMessage(ss.str().c_str());
 
-  ImageType::Pointer coloredLabelImage = ImageType::New();
-  Helpers::ColorLabelsByAverageColor<ImageType, LabelImageType>(this->Image, this->LabelImage, coloredLabelImage);
+  QImage qimage = HelpersQt::GetQImageRGB<ImageType>(GraphCutThread->GetO);
+  if(this->LabelImagePixmapItem)
+    {
+    this->Scene->removeItem(this->LabelImagePixmapItem);
+    }
+  this->LabelImagePixmapItem = this->Scene->addPixmap(QPixmap::fromImage(qimage));
 
+  Refresh();
+}
+
+void SuperPixelSegmentationGUI::slot_SLICComplete()
+{
   QImage qimage = HelpersQt::GetQImageRGB<ImageType>(coloredLabelImage);
   if(this->LabelImagePixmapItem)
     {

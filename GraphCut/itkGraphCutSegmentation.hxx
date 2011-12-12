@@ -24,7 +24,43 @@ template< typename TInputImage, typename TOutputLabelImage>
 GraphCutSegmentation< TInputImage, TOutputLabelImage>
 ::GraphCutSegmentation() : m_MinSize(20), m_K(500), m_Sigma(2.0)
 {
+  this->SetNumberOfRequiredOutputs(2);
 
+  this->SetNthOutput( 0, this->MakeOutput(0) );
+  this->SetNthOutput( 1, this->MakeOutput(1) );
+}
+
+template< typename TInputImage, typename TOutputLabelImage>
+DataObject::Pointer GraphCutSegmentation<TInputImage, TOutputLabelImage>::MakeOutput(unsigned int idx)
+{
+  DataObject::Pointer output;
+
+  switch ( idx )
+    {
+    case 0:
+      output = ( TOutputLabelImage::New() ).GetPointer(); // The output for the label image
+      break;
+    case 1:
+      output = ( TInputImage::New() ).GetPointer(); // The output for the image colored by the average color in each region
+      break;
+    default:
+      std::cerr << "No output " << idx << std::endl;
+      output = NULL;
+      break;
+    }
+  return output.GetPointer();
+}
+
+template< typename TInputImage, typename TOutputLabelImage>
+TOutputLabelImage* GraphCutSegmentation<TInputImage, TOutputLabelImage>::GetLabelImage()
+{
+  return dynamic_cast< TOutputLabelImage * >(this->ProcessObject::GetOutput(0) );
+}
+
+template< typename TInputImage, typename TOutputLabelImage>
+TInputImage* GraphCutSegmentation<TInputImage, TOutputLabelImage>::GetColoredImage()
+{
+  return dynamic_cast< TInputImage * >(this->ProcessObject::GetOutput(1) );
 }
 
 template< typename TInputImage, typename TOutputLabelImage>
@@ -57,7 +93,7 @@ void GraphCutSegmentation< TInputImage, TOutputLabelImage>
 
   Helpers::WriteImage<TInputImage>(input, "finalInput.mha");
   
-  typename TOutputLabelImage::Pointer outputLabelImage = this->GetOutput();
+  typename TOutputLabelImage::Pointer outputLabelImage = this->GetLabelImage();
   outputLabelImage->SetRegions(input->GetLargestPossibleRegion());
   outputLabelImage->Allocate();
 
@@ -102,6 +138,7 @@ void GraphCutSegmentation< TInputImage, TOutputLabelImage>
 
   Helpers::RelabelSequential<TOutputLabelImage>(outputLabelImage, outputLabelImage);
     
+  Helpers::ColorLabelsByAverageColor<TInputImage, TOutputLabelImage>(input, this->GetLabelImage(), this->GetColoredImage());
 }
 
 }// end namespace

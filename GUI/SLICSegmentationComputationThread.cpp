@@ -35,7 +35,7 @@ void SLICSegmentationComputationThread::Compute()
 
   this->Object->Compute();
 
-  emit IterationCompleteSignal(this->Object->FinalNumberOfSegments);
+  emit IterationCompleteSignal();
 
   // When the function is finished, end the thread
   exit();
